@@ -11,5 +11,5 @@ def homeFunc():
 
 #ensures app is not restart manually if any changes are made in code
 if __name__ == '__main__':
-    #runs app in debug mode
+    #runs app in debug  mode
     app.run(debug=True)
