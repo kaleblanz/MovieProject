@@ -1,44 +1,99 @@
-.dropdown{
+header{
+    /*horizontal graidnet of 3 colors*/
+  background: linear-gradient(135deg, #1f1c2c, #928dab, #3f2b96, #a8c0ff);
+  /*englarges the background gradient area to 4 times widht anad height*/
+  background-size: 300% 300%;
+  /*runs @keyframes gradientShift for 7s, easeinandout and loop*/
+  animation: gradientShift 7s ease-in-out infinite;
+  /*alight text to center*/
+  text-align: center;
+  /*how much space the gradient takes up*/
+  padding: 25px 0;
+  font-family: 'Segoe UI', sans-serif;
+  color: rgb(0, 0, 0);
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+body{
+    /*the menu wraps around the whole line*/
+    margin: 0;
+    padding: 0;
+    background-color: white;
+}
+
+.title{
+    /*h1 in header has class=title*/
+    /*block around the text*/
     display: inline-block;
-    /*since its a div it makes it so 
-    we actually hover over the dropdown
-    button food */
+    /*background-color: red;*/
+    padding: 5px 10px;
+    border-radius: 25px;
+    font-size: 2.5em;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    opacity: 0.1;
+    /*start the opac at .1 then fade into 1 in 2s*/
+    animation: fadeInOpacity 2s ease-in forwards;
+    /*adds a red neon like logo to header*/
+    text-shadow:
+    0 0 2px #51239b,
+    0 0 4px #651ed6,
+    0 0 8px #651ed6,
+    0 0 12px #651ed6;
+    
 }
-.dropdown button{
-    background-color: rgb(180, 110, 110);
-    color: white;
-    padding: 10px 10px; /*how big dropdwon button is*/
-    border: none; 
+@keyframes fadeInOpacity{
+    from{
+        opacity: 0.1;
+        
+    }
+    to{
+        opacity: 1;
+    }
 }
 
-/*formats the links inside the dropdown*/
-.dropdown a{
-    display: block; 
-    color: black; /*color of dropdown choices*/
-    text-decoration: none;
-    padding: 10px 15px
+ul {
+/*color of unsorted list*/
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
 }
 
-/*dropdowns content has no behavior when idle*/
-.dropdown .content{
-    display: none;
-    background-color: rgb(140, 235, 238);
-    position: absolute;
-    min-width: 100px;
-    box-shadow: 2px 2px 5px black;
+li {
+    /*elems of ul go from left to right*/
+  float: left;
 }
 
-/*show dropdown menu when hovering */
-.dropdown:hover .content{
-    display: block;
+
+li a {
+  display: block; /*each elem is a block*/
+  color: white;
+  text-align: center;
+  padding: 14px 20px; /*padding around each block*/
+  text-decoration: none;
 }
 
-/* hovering over a dropdown button*/
-.dropdown:hover button{
-    background-color: red;
+/* Change the link color to #111 (black) on hover */
+li a:hover {
+  background-color: rgb(56, 201, 43);
 }
 
-/* hovering over an item in the dropdown*/
-.dropdown a:hover{
-    background-color: blue;
+#signIn{
+    float: right;
+    background-color: #3f2b96;
 }

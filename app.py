@@ -66,7 +66,7 @@ def aiscripting():
     response = client.chat.completions.create(
     model="gpt-4o",
     messages=[
-        {"role": "user", "content": "Write a one-sentence bedtime story about a turtle."}
+        {"role": "user", "content": "Write a one-sentence bedtime story about iron man."}
     ]
 )
 
