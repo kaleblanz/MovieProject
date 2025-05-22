@@ -1,0 +1,44 @@
+.dropdown{
+    display: inline-block;
+    /*since its a div it makes it so 
+    we actually hover over the dropdown
+    button food */
+}
+.dropdown button{
+    background-color: rgb(180, 110, 110);
+    color: white;
+    padding: 10px 10px; /*how big dropdwon button is*/
+    border: none; 
+}
+
+/*formats the links inside the dropdown*/
+.dropdown a{
+    display: block; 
+    color: black; /*color of dropdown choices*/
+    text-decoration: none;
+    padding: 10px 15px
+}
+
+/*dropdowns content has no behavior when idle*/
+.dropdown .content{
+    display: none;
+    background-color: rgb(140, 235, 238);
+    position: absolute;
+    min-width: 100px;
+    box-shadow: 2px 2px 5px black;
+}
+
+/*show dropdown menu when hovering */
+.dropdown:hover .content{
+    display: block;
+}
+
+/* hovering over a dropdown button*/
+.dropdown:hover button{
+    background-color: red;
+}
+
+/* hovering over an item in the dropdown*/
+.dropdown a:hover{
+    background-color: blue;
+}
