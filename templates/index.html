@@ -8,9 +8,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!--url_for() generates a URL to a specific route-->
 
-    <script src="{{url_for('static', filename='js/main.js')}}" defer></script>
+    <script src="{{url_for('static', filename='js/main.js')}}"></script>
     <!--url_for()tells flask to look inside static/ folder-->
     <!--defer ensures JS runs after HTML is loaded-->
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+
 </head>
 <body>
     <header>
@@ -22,18 +29,22 @@
             <li><a href="">Home</a></li>
             <li><a href="">Contact</a></li>
             <li><a href="">About Us</a></li>
-            <li><a href="">Support</a></li>
             <li id="signIn"><a href="">Sign In</a></li>
         </ul>
     </nav>
 
     <main>
-        <div id="movie-carousel" class="carousel-container"></div>
-
+        <!-- swiper container for the carousel -->
+        <div class="swiper mySwiper">
+            <!-- wrapper that will contain the individual slides -->
+            <div id="movie-carousel" class="swiper-wrapper">
+                <!-- Slides will be added here by JS dynamically -->
+            </div>
+        </div>
     </main>
 
     <footer>
-
+        <h1>Thank you for visiting</h1>
     </footer>
     
 </body>

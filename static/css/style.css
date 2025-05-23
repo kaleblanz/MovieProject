@@ -98,27 +98,52 @@ li a:hover {
     background-color: #3f2b96;
 }
 
-#movie-carousel{
-  display: flex; /*arange the elements horiz*/
-  overflow-x: auto; /*allow horiz scrolling if elems overflow*/
-  scroll-behavior: smooth; /*makes scrolling smooth*/
-  padding: 1rem;
-  gap: 1rem;
-  white-space: nowrap;
+
+/*the slider for popular movies*/
+.swiper{
+  width: 100%; /*occupy 90% of parents width*/
+  max-width: 990px; /*limit on large screenss*/
+  margin: 0 auto;
+  padding-top: 20px; /*padding above*/
+  padding-bottom: 40px; /*padding above*/
+  box-sizing: border-box;
 }
 
-.movie-card {
-  flex: 0 0 auto;
-  background-color: #f2f2f2;
-  border-radius: 10px;
-  padding: 1rem;
-  min-width: 200px;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+.swiper-slide{
+  background: #fff; /*white background for each slide*/
+  border-radius: 10px; /*round corners*/
+  text-align: center; /*cetner text and descrip*/
+  width: 300px;
+  flex-shrink: 0;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15); /*drop shadow*/
+  transition: transform 0.3s;
+  margin-right: 30px;
+  }
+.movie-poster {
+  width: 100%; /*poster fills entire width of slide*/
+  height: auto; /*keep image same ratio*/
+  border-radius: 10px 10px 0 0; /*round top corners of poster only*/
+  }
+/*text area below the image*/
+.movie-info {
+  padding: 15px; /*space around title and descrip*/
+  font-size: .9em;
+  }
+
+.swiper-slide:hover{
+  transform: scale(1.15);
+  transition: transfrom 0.3s ease;
 }
 
-.movie-card:hover {
-  transform: scale(1.1);
-  background-color: #e0e0e0;
+@media (max-width: 768px) {
+  .swiper-slide {
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .swiper-slide {
+    max-width: 150px;
+  }
 }

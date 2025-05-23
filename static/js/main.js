@@ -1,28 +1,46 @@
-//DOMContentLoaded waits for HTML to be fully loaded
+//run this script once the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
-    //sends request to flask, asking for data at /popularMovies endpoint
-    fetch('/popularMovies')
-        //turn response into its JSON format
-        .then(response => response.json())
-        //receives parsed JSON and puts it into var: data
-        .then(data => {
-            //data is the list of movies
-            const carousel  = document.getElementById("movie-carousel");
-            //carousel refers the <div> with the id of "movie-carousel"
+  //fetch the popualr movies from the flask endpoint
+  fetch('/popularMovies')
+    .then(response => response.json()) //parse the http into json
+    .then(data => {
+      //get the carouesel container where the sldies will be added
+      const carousel = document.getElementById("movie-carousel");
 
-            //goes through each movie in data
-            data.results.forEach(movie => {
-                //creates a new div for each movie
-                const movieItem = document.createElement("div");
-                movieItem.classList.add("movie-card"); //for styling CSS
-                
-                //fills in the text for the movieitem
-                movieItem.textContent = movie.title; 
+      //loop through each moveie
+      data.results.forEach(movie => {
+        //create a new div to be a movie slide
+        const slide = document.createElement("div");
+        //add swiper-specific class for functionaltiy and styling
+        slide.classList.add("swiper-slide");
 
-                //add the movie div to the caresoul
-                carousel.appendChild(movieItem);
-            });
-        })
-        //if error, shows in browser console
-        .catch(error=>console.error("error fetching carousel movies:",error));
+        //setting the slides innerHTML to have poster, title and descrip
+        slide.innerHTML = `
+          <img class="movie-poster" src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+          <div class="movie-info">
+            <h3>${movie.title}</h3>
+    
+          </div>
+        `;//<p>${movie.overview}</p>
+
+        //add the finished slide product to the carousel container
+        carousel.appendChild(slide);
+      });
+
+      //initialize Swiper with desired functioanlity
+      new Swiper(".mySwiper", {
+        slidesPerView: 3, 
+        spaceBetween: 30, //30px between slides
+        centeredSlides: true, 
+        loop: true, //infinite
+        autoplay: {
+          delay: 3000,  //advance every 3 secs
+          disableOnInteraction: false, //keep autoplay running after user interaction
+        },
+        grabCursor: true, //change cursor to grab icon on hover
+      });
+    })
+
+    //log error if fetch fails
+    .catch(err => console.error("Error loading movies:", err));
 });
