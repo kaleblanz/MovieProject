@@ -1,19 +1,59 @@
 from openai import OpenAI
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, url_for,redirect
 import os
 from dotenv import load_dotenv
 import requests
+import json
 
 #app object resprents our web app, instance of flask class
 app = Flask(__name__)
 
 
 #this route decorator connects this url to homeFunc()
+#whatever is returned is what the visitor sees in their browser
 @app.route('/') #string inside is the URL path: https://localhost:5000/
-def homeFunc():
-    return aiscripting()
+def root():
+    """
+    redirects from root to homepage
+
+    returns: redirect to homePage
+    """
+    return redirect(url_for('homePage'))
     #return "welcome to the home page of this movie proj"
-    #whatever is returned is what the visitor sees in their browser
+    
+@app.route('/home')
+def homePage():
+    """
+    renders the index.html file
+
+    returns: the home page
+    """
+    return render_template("index.html")
+    #datas = currentPopularMovies()['results']
+    #return render_template("index.html",datas=datas)
+
+@app.route('/popularMovies')
+def currentPopularMovies():
+    url = "https://api.themoviedb.org/3/movie/popular"
+    headers = {
+        "accept":"application/json"
+    }
+    params={
+        "language" : "en-US",
+        "api_key": os.getenv("TMDB_API_KEY"),  #api key
+        "page" : 1
+    }
+    response = requests.get(url,headers=headers,params=params)
+
+    #error with the fetching the movies
+    if response.status_code != 200:
+        print("error:", response.status_code) 
+        return response.status_code
+    else:#good to continue
+        data=response.json()
+        return jsonify(data)
+
+
 
 
 @app.route('/search/<string:movieTitle>') #movieTitle is a path parameter

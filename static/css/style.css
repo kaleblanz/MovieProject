@@ -97,3 +97,28 @@ li a:hover {
     float: right;
     background-color: #3f2b96;
 }
+
+#movie-carousel{
+  display: flex; /*arange the elements horiz*/
+  overflow-x: auto; /*allow horiz scrolling if elems overflow*/
+  scroll-behavior: smooth; /*makes scrolling smooth*/
+  padding: 1rem;
+  gap: 1rem;
+  white-space: nowrap;
+}
+
+.movie-card {
+  flex: 0 0 auto;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  padding: 1rem;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover {
+  transform: scale(1.1);
+  background-color: #e0e0e0;
+}

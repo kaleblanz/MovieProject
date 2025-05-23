@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CinemaPrompt</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="/movie_project/static/cinemaprompt.png">
+    <!--jinja syntax for inserting dynamic content for HTMl templates-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!--url_for() generates a URL to a specific route-->
+
+    <script src="{{url_for('static', filename='js/main.js')}}" defer></script>
+    <!--url_for()tells flask to look inside static/ folder-->
+    <!--defer ensures JS runs after HTML is loaded-->
 </head>
 <body>
     <header>
@@ -23,6 +28,7 @@
     </nav>
 
     <main>
+        <div id="movie-carousel" class="carousel-container"></div>
 
     </main>
 
