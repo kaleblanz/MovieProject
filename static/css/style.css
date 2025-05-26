@@ -12,7 +12,7 @@ header{
   font-family: 'Segoe UI', sans-serif;
   color: rgb(0, 0, 0);
 }
-
+/*gradient shift for behind title*/
 @keyframes gradientShift {
   0% {
     background-position: 0% 50%;
@@ -25,6 +25,11 @@ header{
   }
 }
 
+/*title about carouesl of trending movies*/
+#titlePopMovies{
+  color: rgb(202, 96, 96);
+  text-align: center;
+}
 
 body{
     /*the menu wraps around the whole line*/
@@ -33,6 +38,7 @@ body{
     background-color: white;
 }
 
+/*the title in  header*/
 .title{
     /*h1 in header has class=title*/
     /*block around the text*/
@@ -55,6 +61,7 @@ body{
     0 0 12px #651ed6;
     
 }
+/*title fading in*/
 @keyframes fadeInOpacity{
     from{
         opacity: 0.1;
@@ -65,27 +72,25 @@ body{
     }
 }
 
+/*nav bar*/
 ul {
 /*color of unsorted list*/
   list-style-type: none;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #333;
-}
-
-li {
-    /*elems of ul go from left to right*/
-  float: left;
+  background-color: #333333;
 }
 
 
+/*list elem in nav bar*/
 li a {
   display: block; /*each elem is a block*/
   color: white;
   text-align: center;
   padding: 14px 20px; /*padding around each block*/
   text-decoration: none;
+  float: left;
 }
 
 /* Change the link color to #111 (black) on hover */
@@ -93,57 +98,81 @@ li a:hover {
   background-color: rgb(56, 201, 43);
 }
 
+/*sign in button in nav bar*/
 #signIn{
     float: right;
     background-color: #3f2b96;
 }
 
 
-/*the slider for popular movies*/
+
+/*this link in html: <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+has predefined class that we use such as .swiper  and .swiper slide*/
+
+/*container for swiper carousel of pop. movies*/
 .swiper{
-  width: 100%; /*occupy 90% of parents width*/
-  max-width: 990px; /*limit on large screenss*/
-  margin: 0 auto;
+  width: 100%; /*occupy 100% of parents width*/
+  max-width: 990px; /*caps width*/
+  margin: 0 auto; /*center horizontally*/
   padding-top: 20px; /*padding above*/
   padding-bottom: 40px; /*padding above*/
-  box-sizing: border-box;
+  box-sizing: border-box; /*includes padding in width calculations*/
 }
 
+/*each indiviual slide*/
 .swiper-slide{
-  background: #fff; /*white background for each slide*/
+  background: white; /*white background for each slide*/
   border-radius: 10px; /*round corners*/
-  text-align: center; /*cetner text and descrip*/
-  width: 300px;
-  flex-shrink: 0;
-  margin: 0 auto;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15); /*drop shadow*/
-  transition: transform 0.3s;
-  margin-right: 30px;
+  text-align: center; /*cetner poster and title*/
+  width: 300px; /*fixed width*/
+  flex-shrink: 0; /*prevent shrinking in container */
+  margin: 0 auto; /*center movie slide inside caresoul*/
+  box-shadow: 0 4px 10px hsla(0, 6%, 37%, 0.15); /*drop shadow*/
   }
+
+  /*movie poster inside each slide, from inner html in js*/
 .movie-poster {
   width: 100%; /*poster fills entire width of slide*/
   height: auto; /*keep image same ratio*/
   border-radius: 10px 10px 0 0; /*round top corners of poster only*/
-  }
-/*text area below the image*/
-.movie-info {
-  padding: 15px; /*space around title and descrip*/
-  font-size: .9em;
+  padding-top: 50px; /*space above image*/
   }
 
+/*text area below each poster*/
+.movie-info {
+  padding: 15px; /*space around title*/
+  font-size: .9em; /*font size*/
+  }
+
+  /*hovering over a slide*/
 .swiper-slide:hover{
-  transform: scale(1.15);
-  transition: transfrom 0.3s ease;
+  transform: scale(1.1); /*enlarge the slide by x1.1*/
+  transition: transform 0.3s ease; /*smooth scaling transition*/
 }
 
+/*adjustments for tablets/ipads*/
 @media (max-width: 768px) {
   .swiper-slide {
-    max-width: 200px;
+    max-width: 200px; /*reduce slide width to still fit 3 slides at atime*/
   }
 }
 
+/*adjustments for phones*/
 @media (max-width: 480px) {
   .swiper-slide {
-    max-width: 150px;
+    max-width: 150px; /*reduce slide witdth to still fit 3 slides at a time for phones*/
   }
+}
+
+
+
+/*prompt box in home screen*/
+#PromptBox{
+  background-color: rgb(241, 183, 183);
+  width: 1000px;
+  height: 80px;
+}
+
+#submitButton{
+  background-color: rgb(91, 230, 91);
 }

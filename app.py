@@ -1,9 +1,13 @@
 from openai import OpenAI
-from flask import Flask, jsonify, render_template, url_for,redirect
+from flask import Flask, jsonify, render_template, url_for,redirect, request
 import os
 from dotenv import load_dotenv
 import requests
 import json
+
+#request vs requests:
+#request from Flask is for incoming HTTP requests to my flask server
+#requests from python lib is for sending HTTP requests to other API's or Servers
 
 #app object resprents our web app, instance of flask class
 app = Flask(__name__)
@@ -32,6 +36,8 @@ def homePage():
     #datas = currentPopularMovies()['results']
     #return render_template("index.html",datas=datas)
 
+#endpoint for js to fetch to get the top trending movies
+#returns first page of current trending movies
 @app.route('/popularMovies')
 def currentPopularMovies():
     url = "https://api.themoviedb.org/3/movie/popular"
@@ -52,6 +58,16 @@ def currentPopularMovies():
     else:#good to continue
         data=response.json()
         return jsonify(data)
+
+
+#POST request is HTTP method when client sends data to the server
+@app.route('/MovieRecForUserPrompt', methods=['POST'])
+def MovieRecommendationForUser():
+    #parses incoming json from the client
+    userPrompt = request.get_json().get('userPrompt')
+    print(userPrompt) 
+
+
 
 
 

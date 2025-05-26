@@ -34,17 +34,34 @@
     </nav>
 
     <main>
+        <h1 id="titlePopMovies"><b><i>Current Trending Films:</i></b></h1>
+
+
         <!-- swiper container for the carousel -->
         <div class="swiper mySwiper">
-            <!-- wrapper that will contain the individual slides -->
+
+            <!-- wrapper that will contain the individual slides, class="swiper-wrapper" is mandatory even if not directly using it -->
             <div id="movie-carousel" class="swiper-wrapper">
+
                 <!-- Slides will be added here by JS dynamically -->
             </div>
         </div>
+
+        <form>
+            <label for="PromptBox">Write your Prompt for your reccomended movies:</label>
+            <textarea id="PromptBox" name="userPrompt" required
+            placeholder="Please reccomended me movies that ..." minlength="8"></textarea>
+            <!-- adding a name ensures the value of the textarea is included under the key="userPrompt"
+            essential for backend handling, flask acceses this by request.form["userPrompt"] -->
+            <br>
+            <input type="submit" id="submitButtonForPromptBox">
+            <input type="reset">
+        </form>
+
     </main>
 
     <footer>
-        <h1>Thank you for visiting</h1>
+        <h1 style="background-color: cadetblue;">Thank you for visiting</h1>
     </footer>
     
 </body>
