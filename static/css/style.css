@@ -173,6 +173,6 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   height: 80px;
 }
 
-#submitButton{
-  background-color: rgb(91, 230, 91);
+#submitButtonForPromptBox{
+  background-color: rgb(106, 236, 106);
 }

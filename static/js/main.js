@@ -24,7 +24,7 @@ function fetchPopularCarouselMoviesHomePage(){
           slide.innerHTML = `
             <img class="movie-poster" src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
             <div class="movie-info">
-              <h2>${movie.title}</h2>
+              <h3>${movie.title}</h3>
             </div>`;
             //<p>${movie.overview}</p>
 
@@ -47,7 +47,7 @@ function fetchPopularCarouselMoviesHomePage(){
       })
 
       //log error if fetch fails
-      .catch(err => console.error("Error loading movies:", err));
+      .catch(err => console.error("Error loading popular movies for home screen:", err));
   });
 }
 fetchPopularCarouselMoviesHomePage();
@@ -61,5 +61,23 @@ fetchPopularCarouselMoviesHomePage();
  * @returns void
  */
 function fetchRecommendationForUserMoviePrompt(submissionEvent){
-  submissionEvent.preventDefault()//this prevents the page from reloading
+    submissionEvent.preventDefault();//this prevents the page from reloading
+    const userInput = document.querySelector("#PromptBox").value;
+    fetch('/MovieRecForUserPrompt',{
+      method: 'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({userPrompt: userInput})
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Rec movies:",data)
+      })
+      .catch(err => console.error("error fetching movie recs for user", err));
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  //you pass the function with no args bc then the browser calls when the form is submitted and passing event obj automatically
+document.querySelector("form").addEventListener("submit",fetchRecommendationForUserMoviePrompt)
+})
