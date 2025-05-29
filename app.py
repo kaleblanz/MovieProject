@@ -55,7 +55,8 @@ def currentPopularMovies():
     params={
         "language" : "en-US",
         "api_key": os.getenv("TMDB_API_KEY"),  #api key
-        "page" : 1
+        "page" : 1,
+        "sort_by" : "popularity.desc"
     }
     response = requests.get(url,headers=headers,params=params)
 
@@ -74,8 +75,11 @@ def MovieRecommendationForUserEndPoint():
     #parses incoming json from the client
     userPrompt = request.get_json().get('userPrompt')
     print(userPrompt)
-    print(sendingPromtToGPT(userPrompt))
+    movie_data = sendingPromtToGPT(userPrompt)
+    print(movie_data)
+    #print(discoverUsersRecommendationFromPrompt(movie_data))
     return jsonify(userPrompt) 
+
 
 def sendingPromtToGPT(userPrompt):
     #load env variables from the .env file
@@ -102,6 +106,9 @@ def sendingPromtToGPT(userPrompt):
             "Use 'with_crew' if the user specifies a specific behind-the-scenes role such as composer, editor, or cinematographer."
             "When assigning a value to 'with_crew', extract only the person's name (e.g., from 'music by Hans Zimmer', use 'Hans Zimmer')."
             "Use 'with_people' only when the person is mentioned without a specific job title or when the role is general, like 'director', 'producer', or 'creator'."
+
+            "For example, the user input of 'Action or thriller movies without Tom Cruise or Brad Pitt' should result in the 'with_genres'='28|53' and ."
+
             "(for genres, cast, crew, people, watch_providers, companies, and keywords, keep them in their string form and don't turn them into their ID equivalent): "
             "certification, certification.gte, certification.lte, certification_country, "
             "include_adult, include_video, primary_release_year, primary_release_date.gte, primary_release_date.lte, region,"
@@ -327,6 +334,28 @@ def searchProviderIDTMDB(provider):
             return provider_dict['provider_id']
     
     raise ValueError(f"the provider {provider} does not exist")
+
+
+def discoverUsersRecommendationFromPrompt(movie_data: MovieFormatter):
+    url = "https://api.themoviedb.org/3/discover/movie"
+    headers = {"Accept" : "application/json"}
+    params={"api_key" : os.getenv("TMDB_API_KEY")}
+
+    #loop through all key,value pairs in movie_data with values not None
+    for key,value in movie_data.model_dump().items():
+        if value != None:
+            params[key] = value
+    
+    response = requests.get(url=url,headers=headers,params=params)
+
+    if response.status_code != 200:
+        raise ValueError(f"there was no valid rec's for the moviedata:{movie_data}")
+    
+    response = response.json()
+
+    results = response.get('results',[])
+    #results could be list of dictionarys or empty list
+    return results
 
 
 

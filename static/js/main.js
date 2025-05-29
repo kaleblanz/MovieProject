@@ -77,6 +77,7 @@ function fetchRecommendationForUserMoviePrompt(submissionEvent){
       .catch(err => console.error("error fetching movie recs for user", err));
 }
 
+//wait for the Document Object Model to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
   //you pass the function with no args bc then the browser calls when the form is submitted and passing event obj automatically
 document.querySelector("form").addEventListener("submit",fetchRecommendationForUserMoviePrompt)
