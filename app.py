@@ -74,10 +74,10 @@ def MovieRecommendationForUserEndPoint():
     #parses incoming json from the client
     userPrompt = request.get_json().get('userPrompt')
     print(userPrompt)
-    print(aifunc(userPrompt))
+    print(sendingPromtToGPT(userPrompt))
     return jsonify(userPrompt) 
 
-def aifunc(userPrompt):
+def sendingPromtToGPT(userPrompt):
     #load env variables from the .env file
     load_dotenv()
 
@@ -98,8 +98,10 @@ def aifunc(userPrompt):
             {"role" : "system", "content": "You're a movie search assistant. Your job is to convert the user's natural language movie request "
             "into a structured JSON object that matches the MovieFormatter BaseModel for the TMDB Discover Get Method. "
             "AND/OR Logic: comma's (,) are treated like an AND query while pipe's (|) are treated like an OR. "
-            "If the user refers to actors or actresses (people seen in the movie), always use 'with_cast' even if 'AND' or 'OR' is used."
-            "Only use 'with_people' if the user mentions a writer, director, crew, or when the role is not seen in the actual movie"
+            "If the user refers to actors or actresses (people seen in the movie), always use 'with_cast' — even when 'AND' or 'OR' is used."
+            "Use 'with_crew' if the user specifies a specific behind-the-scenes role such as composer, editor, or cinematographer."
+            "When assigning a value to 'with_crew', extract only the person's name (e.g., from 'music by Hans Zimmer', use 'Hans Zimmer')."
+            "Use 'with_people' only when the person is mentioned without a specific job title or when the role is general, like 'director', 'producer', or 'creator'."
             "(for genres, cast, crew, people, watch_providers, companies, and keywords, keep them in their string form and don't turn them into their ID equivalent): "
             "certification, certification.gte, certification.lte, certification_country, "
             "include_adult, include_video, primary_release_year, primary_release_date.gte, primary_release_date.lte, region,"
