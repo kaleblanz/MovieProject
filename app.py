@@ -7,7 +7,11 @@ import json
 
 #for our MovieFormatter Object
 from pydantic import BaseModel 
-from typing import Optional, List
+from typing import Optional
+
+#for splitting a string with mutiple characters
+import re
+
 
 #request vs requests:
 #request from Flask is for incoming HTTP requests to my flask server
@@ -73,7 +77,6 @@ def MovieRecommendationForUserEndPoint():
     print(aifunc(userPrompt))
     return jsonify(userPrompt) 
 
-
 def aifunc(userPrompt):
     #load env variables from the .env file
     load_dotenv()
@@ -95,9 +98,9 @@ def aifunc(userPrompt):
             {"role" : "system", "content": "You're a movie search assistant. Your job is to convert the user's natural language movie request "
             "into a structured JSON object that matches the MovieFormatter BaseModel for the TMDB Discover Get Method. "
             "AND/OR Logic: comma's (,) are treated like an AND query while pipe's (|) are treated like an OR. "
-            "If the user refers to actors or actresses (people seen in the movie), always use 'with_cast' even if 'AND' or 'OR' is used"
+            "If the user refers to actors or actresses (people seen in the movie), always use 'with_cast' even if 'AND' or 'OR' is used."
             "Only use 'with_people' if the user mentions a writer, director, crew, or when the role is not seen in the actual movie"
-            "(don't convert person ID, just use their names): "
+            "(for genres, cast, crew, people, watch_providers, companies, and keywords, keep them in their string form and don't turn them into their ID equivalent): "
             "certification, certification.gte, certification.lte, certification_country, "
             "include_adult, include_video, primary_release_year, primary_release_date.gte, primary_release_date.lte, region,"
             "release_date.gte, release_date.lte, vote_average.gte, vote_average.lte, vote_count.gte, vote_count.lte, watch_region, with_cast, with_companies,"
@@ -110,7 +113,13 @@ def aifunc(userPrompt):
         ],
         text_format = MovieFormatter #where my pydantic baseModel is used
     )
-    return response.output_parsed
+
+    
+    movie_data = callAllHelperFunctionsToConvertAttributrestoID(response.output_parsed)
+
+    #returns an instance of my MovieFormatter Pydantic Model
+    return movie_data
+
 
 #optional means its okay if the user does not give a value for this specific attribute
 class MovieFormatter(BaseModel):
@@ -149,6 +158,177 @@ class MovieFormatter(BaseModel):
     without_keywords: Optional[str] = None
     without_watch_providers: Optional[str] = None
     year: Optional[int] = None
+
+def callAllHelperFunctionsToConvertAttributrestoID(movie_data: MovieFormatter):
+    """
+    calls the respective search function for the respective attribute of our pydantic model MovieFormatter
+    """
+    movie_data.with_cast = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.with_cast,searchPersonIDTMDB)
+    movie_data.with_crew = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.with_crew,searchPersonIDTMDB)
+    movie_data.with_people = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.with_people,searchPersonIDTMDB)
+
+    movie_data.with_companies = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.with_companies,searchCompanyIDTMDB)
+    movie_data.without_companies = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.without_companies,searchCompanyIDTMDB)
+
+    movie_data.with_genres = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.with_genres,searchGenreIDTMDB)
+    movie_data.without_genres = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.without_genres,searchGenreIDTMDB)
+
+    movie_data.with_keywords = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.with_keywords,searchKeyWordIDTMDB)
+    movie_data.without_keywords = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.without_keywords,searchKeyWordIDTMDB)
+
+    movie_data.with_watch_providers = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.with_watch_providers,searchProviderIDTMDB)
+    movie_data.without_watch_providers = convertStringToIDEquivalentForMovieFormatterAttributes(movie_data.without_watch_providers,searchProviderIDTMDB)
+
+    #returns updated instance of our pydantic model
+    return movie_data
+
+    
+def convertStringToIDEquivalentForMovieFormatterAttributes(input, searchTMDBFunction):
+    """
+    we are converting the cast/crew/people/(w/wo)companies/(w/wo)genres/(w/wo)keywords/(w/wo) providers to their id equivalent
+    when filtering movies, expects ID's not names
+    handles both AND(,) and OR(|)
+    """
+    if input is None:
+        return None
+    #'([,\|])' is a regular expression that splits at comma and pipes, but also keeps them in the splitted list
+    split = re.split(r'([,\|])', input)
+
+    result = []
+
+    for element in split:
+        element = element.strip() #remove leading/trailing whitespace
+        if element not in ['|',',']:
+            result.append(str(searchTMDBFunction(element))) #calls the appropriate function for the MovieFormatter Attribute
+        else:
+            result.append(element)
+    
+    return ''.join(result)
+    #.join is faster than concatenation of +=
+
+
+def searchPersonIDTMDB(person_name):
+    url = "https://api.themoviedb.org/3/search/person"
+    headers = {"Accept" : "application/json"}
+    params = {
+        "query" : person_name,        #movie we're searching for
+        "api_key": os.getenv("TMDB_API_KEY"),  #api key
+        }
+    #sends a GET request to TMDB api to search for a person, .json() turns into python dic
+    response = requests.get(url,headers=headers,params=params)
+
+    if response.status_code != 200:
+        raise RuntimeError(f"TMDB error {response.status_code}: {response.text}")
+    
+    response = response.json()
+
+    #get the results key from response, return [] if results doesn't exist
+    results = response.get("results",[])
+
+    if results:
+        return results[0]['id']
+    else:
+        raise ValueError(f"this person cannot be found: {person_name}")
+
+def searchCompanyIDTMDB(company_name):
+    url = "https://api.themoviedb.org/3/search/company"
+    headers = {"Accept" : "application/json"}
+    params = {
+        "query" : company_name,        #company we're searching for
+        "api_key": os.getenv("TMDB_API_KEY"),  #api key
+        }
+    #sends a GET request to TMDB api to search for a person, .json() turns into python dic
+    response = requests.get(url,headers=headers,params=params)
+
+    if response.status_code != 200:
+        raise RuntimeError(f"TMDB error {response.status_code}: {response.text}")
+    
+    response = response.json()
+
+    #get the results key from response, return [] if results doesn't exist
+    results = response.get("results",[])
+
+    if results:
+        return results[0]['id']
+    else:
+        raise ValueError(f"this company cannot be found: {company_name}")
+
+def searchGenreIDTMDB(genre):
+    url = "https://api.themoviedb.org/3/genre/movie/list"
+    headers = {"Accept" : "application/json"}
+    params = {
+        "api_key": os.getenv("TMDB_API_KEY"),  #api key
+        }
+    #sends a GET request to TMDB api to search for a person, .json() turns into python dic
+    response = requests.get(url,headers=headers,params=params)
+
+    if response.status_code != 200:
+        raise RuntimeError(f"TMDB error {response.status_code}: {response.text}")
+    
+    response = response.json()
+
+    #get the results key from response, return [] if results doesn't exist
+    results = response.get("genres",[])
+
+    for dict_genre in results:
+        if dict_genre['name'].upper() == genre.upper():
+            return dict_genre['id']
+            
+    raise ValueError(f"this genre cannot be found: {genre}")
+
+def searchKeyWordIDTMDB(keyword):
+    url = "https://api.themoviedb.org/3/search/keyword"
+    headers = {
+        "Accept" : "application/json"
+    }
+    params={
+        "query" : keyword,
+        "api_key" : os.getenv("TMDB_API_KEY")
+    }
+
+    response = requests.get(url,headers=headers,params=params)
+
+    if response.status_code != 200:
+        raise RuntimeError(f"TMDB error {response.status_code}: {response.text}")
+    
+    response = response.json()
+
+    results = response.get("results",[])
+
+    for keyword_dict in results:
+        if keyword_dict['name'].upper() == keyword.upper():
+            return keyword_dict['id']
+    
+    raise ValueError(f"the keyword: {keyword} does not exist")
+
+def searchProviderIDTMDB(provider):
+    url = "https://api.themoviedb.org/3/watch/providers/movie"
+
+    headers = {
+        "Accept" : "application/json"
+    }
+    params={
+        "api_key" : os.getenv("TMDB_API_KEY")
+    }
+
+    response = requests.get(url,headers=headers,params=params)
+
+    if response.status_code != 200:
+        raise RuntimeError(f"TMDB error {response.status_code}: {response.text}")
+
+    response = response.json()
+
+    results = response.get('results',[])
+
+    for provider_dict in results:
+        if provider_dict['provider_name'] == provider:
+            return provider_dict['provider_id']
+    
+    raise ValueError(f"the provider {provider} does not exist")
+
+
+
+
 
 """
 def aiscripting():
