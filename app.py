@@ -75,8 +75,17 @@ def MovieRecommendationForUserEndPoint():
     #parses incoming json from the client
     userPrompt = request.get_json().get('userPrompt')
     print(userPrompt)
-    movie_data = sendingPromtToGPT(userPrompt)
-    print(movie_data)
+    flag,movie_data = sendingPromtToGPT(userPrompt)
+    #flag variable describes which prompt was taken
+    #flag=1 -> the prompt of the user is looking for a movie similair to another one
+    #flag=0 -> the prompt of the user uses descriptive words and 
+    if flag == 1:
+        pass
+
+    else: #flag = 0
+        pass
+
+    #print(movie_data)
     #print(discoverUsersRecommendationFromPrompt(movie_data))
     return jsonify(userPrompt) 
 
@@ -95,20 +104,19 @@ def sendingPromtToGPT(userPrompt):
     #initilize openAI object
     client = OpenAI(api_key=api_key)
 
+
     #creating/sending prompt
     response = client.responses.parse(
         model = "gpt-4o",
         input = [
-            {"role" : "system", "content": "You're a movie search assistant. Your job is to convert the user's natural language movie request "
+            {"role" : "system", "content": 
+            "You're a movie search assistant. Your job is to convert the user's natural language movie request "
             "into a structured JSON object that matches the MovieFormatter BaseModel for the TMDB Discover Get Method. "
             "AND/OR Logic: comma's (,) are treated like an AND query while pipe's (|) are treated like an OR. "
             "If the user refers to actors or actresses (people seen in the movie), always use 'with_cast' — even when 'AND' or 'OR' is used."
             "Use 'with_crew' if the user specifies a specific behind-the-scenes role such as composer, editor, or cinematographer."
             "When assigning a value to 'with_crew', extract only the person's name (e.g., from 'music by Hans Zimmer', use 'Hans Zimmer')."
             "Use 'with_people' only when the person is mentioned without a specific job title or when the role is general, like 'director', 'producer', or 'creator'."
-
-            "For example, the user input of 'Action or thriller movies without Tom Cruise or Brad Pitt' should result in the 'with_genres'='28|53' and ."
-
             "(for genres, cast, crew, people, watch_providers, companies, and keywords, keep them in their string form and don't turn them into their ID equivalent): "
             "certification, certification.gte, certification.lte, certification_country, "
             "include_adult, include_video, primary_release_year, primary_release_date.gte, primary_release_date.lte, region,"
@@ -116,18 +124,80 @@ def sendingPromtToGPT(userPrompt):
             "with_crew, with_genres, with_keywords, with_origin_country, with_original_language, with_people, with_release_type, with_runtime.gte,"
             " with_runtime.lte, with_watch_monetization_types, with_watch_providers, without_companies, without_genres, without_keywords,"
             "without_watch_providers, year. "
-            "Format your response strictly as a JSON object that fits the MovieFormatter BaseModel, do include extra text or explanation"},
+            "Format your response strictly as a JSON object that fits the MovieFormatter BaseModel, do include extra text or explanation."},
             
             {"role": "user", "content": userPrompt}
         ],
         text_format = MovieFormatter #where my pydantic baseModel is used
     )
-
+    print('response.output_parse:', response.output_parsed)
     
     movie_data = callAllHelperFunctionsToConvertAttributrestoID(response.output_parsed)
 
     #returns an instance of my MovieFormatter Pydantic Model
-    return movie_data
+    #return 0,movie_data
+
+    response = client.responses.parse(
+            model = "gpt-4o",
+            input=[
+                {"role" : "system", "content" :  "You're a movie search assistant, you are mean't to interpet the natural language movie request"
+                "and recommend the users movies that fit their request. Using your best judgement, if you think the other 2 prompt's I have set wouldn't return"
+                "a suffice answer for the user's prompt, return a string of 4 movies, with those 4 movies being the perfect movie recommend for the users prompt, each seperated by a comma. "
+                "If you think of the 2 prompts will suffice, return the String '-1'. Don't add any text or explanation to your answer. "
+                "Prompt 1:"
+                "-{'role' : 'system', 'content' :  'You're a movie search assistant, extract the name of the movie title"
+                "that the user is looking for a similar movie too."
+                "For example: 'Recommend me a movie that is similiar/like the film Inception'. You would then just return 'Inception' as a string."
+                "If a user lists mutliples movies in their prompt, use your judegment and return the most popular movie."
+                "No explantion or extra text, just the movie title.}"
+
+                "Prompt 2: (Pretend to run Prompt 2, and if all the attributes are equal to 'None', then Prompt 2 is not a suffice answer for the user.)"
+                "-'You're a movie search assistant. Your job is to convert the user's natural language movie request "
+                "into a structured JSON object that matches the MovieFormatter BaseModel for the TMDB Discover Get Method. "
+                "AND/OR Logic: comma's (,) are treated like an AND query while pipe's (|) are treated like an OR. "
+                "If the user refers to actors or actresses (people seen in the movie), always use 'with_cast' — even when 'AND' or 'OR' is used."
+                "Use 'with_crew' if the user specifies a specific behind-the-scenes role such as composer, editor, or cinematographer."
+                "When assigning a value to 'with_crew', extract only the person's name (e.g., from 'music by Hans Zimmer', use 'Hans Zimmer')."
+                "Use 'with_people' only when the person is mentioned without a specific job title or when the role is general, like 'director', 'producer', or 'creator'."
+                "(for genres, cast, crew, people, watch_providers, companies, and keywords, keep them in their string form and don't turn them into their ID equivalent): "
+                "certification, certification.gte, certification.lte, certification_country, "
+                "include_adult, include_video, primary_release_year, primary_release_date.gte, primary_release_date.lte, region,"
+                "release_date.gte, release_date.lte, vote_average.gte, vote_average.lte, vote_count.gte, vote_count.lte, watch_region, with_cast, with_companies,"
+                "with_crew, with_genres, with_keywords, with_origin_country, with_original_language, with_people, with_release_type, with_runtime.gte,"
+                " with_runtime.lte, with_watch_monetization_types, with_watch_providers, without_companies, without_genres, without_keywords,"
+                "without_watch_providers, year. "
+                "Format your response strictly as a JSON object that fits the MovieFormatter BaseModel, do include extra text or explanation."},
+
+                {"role":"user", "content":userPrompt}
+            ]
+        )
+    print('response of base case prompt:',response.output_text)
+
+
+    if IsUserLookingForSimiliarMovies(userPrompt):
+        response = client.responses.parse(
+            model = "gpt-4o",
+            input=[
+                {"role" : "system", "content" :  "You're a movie search assistant, extract the name of the movie title"
+                "that the user is looking for a similar movie too."
+                "For example: 'Recommend me a movie that is similiar/like the film Inception'. You would then just return 'Inception' as a string."
+                "If a user lists mutliples movies in their prompt, use your judegment and return the most popular movie."
+                "No explantion or extra text, just the movie title."},
+                {"role":"user", "content":userPrompt}
+            ]
+        )
+        #returns just the title of the movie the user wants a similiar movie too
+        return 1,response.output_text
+    else:
+        #was prompt 2
+        pass
+
+
+def IsUserLookingForSimiliarMovies(user_prompt):
+    user_prompt = user_prompt.lower()
+    if "similar" in user_prompt or "like" in user_prompt:
+        return True
+
 
 
 #optional means its okay if the user does not give a value for this specific attribute
