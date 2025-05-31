@@ -77,8 +77,8 @@ def MovieRecommendationForUserEndPoint():
     print(userPrompt)
     flag,movie_data = sendingPromtToGPT(userPrompt)
     #flag variable describes which prompt was taken
-    #flag=1 -> the prompt of the user is looking for a movie similair to another one
-    #flag=0 -> the prompt of the user uses descriptive words and 
+    #flag= -> 
+    #flag= -> 
     if flag == 1:
         pass
 
@@ -105,7 +105,7 @@ def sendingPromtToGPT(userPrompt):
     client = OpenAI(api_key=api_key)
 
 
-    #creating/sending prompt
+    #Prompt 1
     response = client.responses.parse(
         model = "gpt-4o",
         input = [
@@ -124,73 +124,75 @@ def sendingPromtToGPT(userPrompt):
             "with_crew, with_genres, with_keywords, with_origin_country, with_original_language, with_people, with_release_type, with_runtime.gte,"
             " with_runtime.lte, with_watch_monetization_types, with_watch_providers, without_companies, without_genres, without_keywords,"
             "without_watch_providers, year. "
-            "Format your response strictly as a JSON object that fits the MovieFormatter BaseModel, do include extra text or explanation."},
+            "Format your response strictly as a JSON object that fits the MovieFormatter BaseModel, do include extra text or explanation."
+
+            "If the users prompt is asking for movies 'similar to' or 'like' another movie (example: 'give me a movie similar to Fight Club'), "
+            "do NOT try to match filters or fill any fields. Instead, leave all fields as `None`."},
             
             {"role": "user", "content": userPrompt}
         ],
         text_format = MovieFormatter #where my pydantic baseModel is used
     )
-    print('response.output_parse:', response.output_parsed)
+    print('Prompt 1:', response.output_parsed)
     
     movie_data = callAllHelperFunctionsToConvertAttributrestoID(response.output_parsed)
 
-    #returns an instance of my MovieFormatter Pydantic Model
-    #return 0,movie_data
+    #all() returns true if every value iterating is truthy, o/w false
+    #getattr(obj, attr), returns the value of obj.attr
+    all_attributes_none = all(
+        getattr(movie_data,attribute) is None
+        for attribute in movie_data.model_dump().keys()
+    )
 
-    response = client.responses.parse(
-            model = "gpt-4o",
-            input=[
-                {"role" : "system", "content" :  "You're a movie search assistant, you are mean't to interpet the natural language movie request"
-                "and recommend the users movies that fit their request. Using your best judgement, if you think the other 2 prompt's I have set wouldn't return"
-                "a suffice answer for the user's prompt, return a string of 4 movies, with those 4 movies being the perfect movie recommend for the users prompt, each seperated by a comma. "
-                "If you think of the 2 prompts will suffice, return the String '-1'. Don't add any text or explanation to your answer. "
-                "Prompt 1:"
-                "-{'role' : 'system', 'content' :  'You're a movie search assistant, extract the name of the movie title"
-                "that the user is looking for a similar movie too."
-                "For example: 'Recommend me a movie that is similiar/like the film Inception'. You would then just return 'Inception' as a string."
-                "If a user lists mutliples movies in their prompt, use your judegment and return the most popular movie."
-                "No explantion or extra text, just the movie title.}"
-
-                "Prompt 2: (Pretend to run Prompt 2, and if all the attributes are equal to 'None', then Prompt 2 is not a suffice answer for the user.)"
-                "-'You're a movie search assistant. Your job is to convert the user's natural language movie request "
-                "into a structured JSON object that matches the MovieFormatter BaseModel for the TMDB Discover Get Method. "
-                "AND/OR Logic: comma's (,) are treated like an AND query while pipe's (|) are treated like an OR. "
-                "If the user refers to actors or actresses (people seen in the movie), always use 'with_cast' — even when 'AND' or 'OR' is used."
-                "Use 'with_crew' if the user specifies a specific behind-the-scenes role such as composer, editor, or cinematographer."
-                "When assigning a value to 'with_crew', extract only the person's name (e.g., from 'music by Hans Zimmer', use 'Hans Zimmer')."
-                "Use 'with_people' only when the person is mentioned without a specific job title or when the role is general, like 'director', 'producer', or 'creator'."
-                "(for genres, cast, crew, people, watch_providers, companies, and keywords, keep them in their string form and don't turn them into their ID equivalent): "
-                "certification, certification.gte, certification.lte, certification_country, "
-                "include_adult, include_video, primary_release_year, primary_release_date.gte, primary_release_date.lte, region,"
-                "release_date.gte, release_date.lte, vote_average.gte, vote_average.lte, vote_count.gte, vote_count.lte, watch_region, with_cast, with_companies,"
-                "with_crew, with_genres, with_keywords, with_origin_country, with_original_language, with_people, with_release_type, with_runtime.gte,"
-                " with_runtime.lte, with_watch_monetization_types, with_watch_providers, without_companies, without_genres, without_keywords,"
-                "without_watch_providers, year. "
-                "Format your response strictly as a JSON object that fits the MovieFormatter BaseModel, do include extra text or explanation."},
-
-                {"role":"user", "content":userPrompt}
-            ]
-        )
-    print('response of base case prompt:',response.output_text)
-
-
-    if IsUserLookingForSimiliarMovies(userPrompt):
-        response = client.responses.parse(
-            model = "gpt-4o",
-            input=[
-                {"role" : "system", "content" :  "You're a movie search assistant, extract the name of the movie title"
-                "that the user is looking for a similar movie too."
-                "For example: 'Recommend me a movie that is similiar/like the film Inception'. You would then just return 'Inception' as a string."
-                "If a user lists mutliples movies in their prompt, use your judegment and return the most popular movie."
-                "No explantion or extra text, just the movie title."},
-                {"role":"user", "content":userPrompt}
-            ]
-        )
-        #returns just the title of the movie the user wants a similiar movie too
-        return 1,response.output_text
+    #if not all the attributes of our pydantic object is 'None'
+    if not all_attributes_none:
+        #if true then we will use Prompt 1 for user's rec
+        #returns an instance of my MovieFormatter Pydantic Model with the ID's as values
+        return 1,movie_data
+    
+    #else if for when we run our Prompt 1 and our pydantic object had all 'None' for it's attributes
     else:
-        #was prompt 2
-        pass
+        if IsUserLookingForSimiliarMovies(userPrompt):
+            #when we true we know the user is looking for a movie similiar to another
+            #Prompt 2
+            response = client.responses.parse(
+                model = "gpt-4o",
+                input=[
+                    {"role" : "system", "content" :  "You're a movie search assistant, extract the name of the movie title"
+                    "that the user is looking for a similar movie too."
+                    "For example: 'Recommend me a movie that is similiar/like the film Inception'. You would then just return 'Inception' as a string."
+                    "If a user lists mutliples movies in their prompt, use your judegment and return the most popular movie."
+                    "No explantion or extra text, just the movie title."},
+                    {"role":"user", "content":userPrompt}
+                ]
+            )
+            #returns just the title of the movie the user wants a similiar movie too
+            print('response of Prompt 2:',response.output_text)
+            return 2,response.output_text
+        
+        else:
+            #Prompt 3
+            #We use this as our last stand for when our other 2 Prompts don't have a suffice answer for the user
+            response = client.responses.parse(
+                    model = "gpt-4o",
+                    input=[
+                        {"role" : "system", "content" :   
+                        "You are a movie recommendation assistant. Return exactly 4 movie titles, as a single string with no spaces and no extra text. "
+                        "Format: Title1,Title2,Title3,Title4\n"
+                        "If the user says 'not with X' or 'not directed by Y', you must exclude any movie involving that person X and Y in any role. "
+                        "Do not include any movie that violates the user's exclusions. No explanations. Only the 4 valid titles. "
+                        "DO NOT include any movies involving Leonardo DiCaprio or Tom Hanks. Double-check every movie title. If it violates this rule, do NOT include it."
+
+
+                        
+                        },
+
+                        {"role":"user", "content":userPrompt}
+                    ]
+                )
+            
+            print('response of Prompt 3:',response.output_text)
+            return 3,response.output_text
 
 
 def IsUserLookingForSimiliarMovies(user_prompt):
