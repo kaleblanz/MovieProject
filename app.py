@@ -171,34 +171,45 @@ def sendingPromtToGPT(userPrompt):
             return 2,response.output_text
         
         else:
+
             #Prompt 3
             #We use this as our last stand for when our other 2 Prompts don't have a suffice answer for the user
-            response = client.responses.parse(
-                    model = "gpt-4o",
-                    input=[
-                        {"role" : "system", "content" :   
-                        "You are a movie recommendation assistant. Return exactly 4 movie titles, as a single string with no spaces and no extra text. "
-                        "Format: Title1,Title2,Title3,Title4\n"
-                        "If the user says 'not with X' or 'not directed by Y', you must exclude any movie involving that person X and Y in any role. "
-                        "Do not include any movie that violates the user's exclusions. No explanations. Only the 4 valid titles. "
-                        "DO NOT include any movies involving Leonardo DiCaprio or Tom Hanks. Double-check every movie title. If it violates this rule, do NOT include it."
-
-
-                        
+            response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are a movie expert.\n"
+                                "The user will provide exclusions, like actors they want to avoid.\n"
+                                "You must NEVER return any movie that features those actors in any capacity — including starring, supporting, cameos, or uncredited roles.\n"
+                                "You are to return exactly 4 movie titles ONLY that fully respect these exclusions.\n"
+                                "If you are unsure about a movie's cast, DO NOT include it.\n"
+                                "Return ONLY in this format:\n"
+                                "{\"movies\": [\"Title1\", \"Title2\", \"Title3\", \"Title4\"]}\n"
+                                "Do not include any other text.\n"
+                                "If you break this rule, you will fail your task."
+                            )
                         },
-
-                        {"role":"user", "content":userPrompt}
-                    ]
+                        {
+                            "role": "user",
+                            "content": userPrompt
+                        }
+                    ],
+                    temperature=0.1
+                    #temperature is the creative control for langauge generatrion 0-2, deterministic-very creative
                 )
-            
-            print('response of Prompt 3:',response.output_text)
-            return 3,response.output_text
+            result = response.choices[0].message.content
+            print('response of Prompt 3:', result)
+            return 3,result
 
 
 def IsUserLookingForSimiliarMovies(user_prompt):
     user_prompt = user_prompt.lower()
     if "similar" in user_prompt or "like" in user_prompt:
         return True
+    else:
+        return False
 
 
 
