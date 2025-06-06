@@ -21,6 +21,24 @@ import re
 app = Flask(__name__)
 
 
+GENRES_ALIASES = {
+    "sci-fi": "Science Fiction",
+    "scifi": "Science Fiction",
+    "sf": "Science Fiction",
+    "romcom": "Romance",
+    "kids": "Family",
+    "children": "Family",
+    "suspense": "Thriller",
+    "doc": "Documentary",
+    "animated": "Animation",
+    "bio": "Biography",
+    "psychological thriller": "Thriller",
+    "superhero": "Action",
+    "superheroes": "Action",
+    "sci fi": "Science Fiction",
+    "sci_fi": "Science Fiction"
+}
+
 #this route decorator connects this url to homeFunc()
 #whatever is returned is what the visitor sees in their browser
 @app.route('/') #string inside is the URL path: https://localhost:5000/
@@ -74,8 +92,8 @@ def currentPopularMovies():
 def MovieRecommendationForUserEndPoint():
     #parses incoming json from the client
     userPrompt = request.get_json().get('userPrompt')
-    print(userPrompt)
-    flag,movie_data = sendingPromtToGPT(userPrompt)
+    print('the users prompt: ',userPrompt)
+    flag,movie_data = direct_user_prompt(userPrompt)
     #flag variable describes which prompt was taken
     #flag= -> 
     #flag= -> 
@@ -90,7 +108,7 @@ def MovieRecommendationForUserEndPoint():
     return jsonify(userPrompt) 
 
 
-def sendingPromtToGPT(userPrompt):
+def direct_user_prompt(userPrompt: str):
     #load env variables from the .env file
     load_dotenv()
 
@@ -104,8 +122,17 @@ def sendingPromtToGPT(userPrompt):
     #initilize openAI object
     client = OpenAI(api_key=api_key)
 
+    if contains_negation(userPrompt=userPrompt):
+        return 3,GPT_PROMPT3(client=client,userPrompt=userPrompt)
 
-    #Prompt 1
+    if IsUserLookingForSimiliarMovies(user_prompt=userPrompt):
+        return 2,GPT_PROMPT2(client=client,userPrompt=userPrompt)
+    
+    return 1,GPT_PROMPT1(client=client,userPrompt=userPrompt)
+
+
+
+def GPT_PROMPT1(client: OpenAI, userPrompt: str):
     response = client.responses.parse(
         model = "gpt-4o",
         input = [
@@ -137,80 +164,237 @@ def sendingPromtToGPT(userPrompt):
     
     movie_data = callAllHelperFunctionsToConvertAttributrestoID(response.output_parsed)
 
-    #all() returns true if every value iterating is truthy, o/w false
-    #getattr(obj, attr), returns the value of obj.attr
-    all_attributes_none = all(
-        getattr(movie_data,attribute) is None
-        for attribute in movie_data.model_dump().keys()
+    #returns an instance of my MovieFormatter Pydantic Model with the ID's as values
+    return 1,movie_data
+
+
+
+
+def GPT_PROMPT2(client: OpenAI, userPrompt: str):
+     #when we true we know the user is looking for a movie similiar to another
+    #Prompt 2
+    response = client.responses.parse(
+        model = "gpt-4o",
+        input=[
+            {"role" : "system", "content" :  "You're a movie search assistant, extract the name of the movie title"
+            "that the user is looking for a similar movie too."
+            "For example: 'Recommend me a movie that is similiar/like the film Inception'. You would then just return 'Inception' as a string."
+            "If a user lists mutliples movies in their prompt, use your judegment and return the most popular movie."
+            "No explantion or extra text, just the movie title."},
+            {"role":"user", "content":userPrompt}
+        ]
+    )
+    #returns just the title of the movie the user wants a similiar movie too
+    print('response of Prompt 2:',response.output_text)
+    return 2,response.output_text
+
+def GPT_PROMPT3(client: OpenAI, userPrompt: str):
+    #to disect the user's prompt 
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role":"system",
+                "content" : (
+                "You are a movie expert. You will be given a natural language prompt from a user about what movies they want recommended. "
+                "You will carefully extract structured information from the prompt and fill in the appropriate values of this JSON Dictionary. "
+                "If a field does not apply or is not mentioned, set it to an empty list ([]) or empty string (\"\") as appropriate. "
+                "You must return EXACTLY one JSON object and nothing else. Do not include any explanation or additional text.  \n\n"
+                "Here is the JSON format to fill:\n"
+                "{\n"
+                '  "include_genres": [],\n'
+                '  "exclude_genres": [],\n'
+                '  "include_people": [],\n'
+                '  "exclude_people": [],\n'
+                '  "include_keywords": [],\n'
+                '  "exclude_keywords": [],\n'
+                '  "include_directors": [],\n'
+                '  "exclude_directors": [],\n'
+                '  "tone": "",  // e.g. dark, uplifting, funny, feel-good\n '
+                '  "decade": "",\n'
+                '  "release_year": "",\n'
+                '  "language": "",\n'
+                '  "country": "",\n'
+                '  "include_runtime_minutes": "",\n'
+                '  "minimum_rating": "",\n'
+                '  "include_certification": "",\n'
+                '  "exclude_certification": "",\n'
+                '  "include_companies": [],\n'
+                '  "exclude_companies": [],\n'
+                '  "notes": ""  // any extra user desires that don\'t fit above fields \n'
+                "}\n"
+            )
+            },
+            
+                {
+                    "role": "user",
+                    "content": userPrompt
+                }
+        ]
     )
 
-    #if not all the attributes of our pydantic object is 'None'
-    if not all_attributes_none:
-        #if true then we will use Prompt 1 for user's rec
-        #returns an instance of my MovieFormatter Pydantic Model with the ID's as values
-        return 1,movie_data
+    result_of_disecting = response.choices[0].message.content
     
-    #else if for when we run our Prompt 1 and our pydantic object had all 'None' for it's attributes
-    else:
-        if IsUserLookingForSimiliarMovies(userPrompt):
-            #when we true we know the user is looking for a movie similiar to another
-            #Prompt 2
-            response = client.responses.parse(
-                model = "gpt-4o",
-                input=[
-                    {"role" : "system", "content" :  "You're a movie search assistant, extract the name of the movie title"
-                    "that the user is looking for a similar movie too."
-                    "For example: 'Recommend me a movie that is similiar/like the film Inception'. You would then just return 'Inception' as a string."
-                    "If a user lists mutliples movies in their prompt, use your judegment and return the most popular movie."
-                    "No explantion or extra text, just the movie title."},
-                    {"role":"user", "content":userPrompt}
-                ]
-            )
-            #returns just the title of the movie the user wants a similiar movie too
-            print('response of Prompt 2:',response.output_text)
-            return 2,response.output_text
+    #in the future, you have to handle these return statements for when this functions returns
+    if not result_of_disecting.strip():
+        print("GPT returned empty content")
+        return 3,{"error":"GPT returned empty result"}
+    try:
+        result_of_disecting = json.loads(result_of_disecting)
+        print('result of inspection:', result_of_disecting)
+    except json.JSONDecodeError as e:
+        print(f"WARNING: JSON decode error: {e} — content was: {result_of_disecting}")
+        return 3, {"error": "Invalid JSON in dissection result"}
+
+    
+
+    response = client.chat.completions.create(
+            model="gpt-4o",
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a movie expert.\n"
+                        "You will be provided with a JSON object that contains structured user preferences and exclusions for a movie recommendation task.\n"
+                        "You must strictly respect the user's constraints:\n"
+                        "- DO NOT include any movie that features people listed in 'exclude_people' (in any capacity: starring, supporting, cameo, uncredited).\n"
+                        "- DO NOT include any movie directed by anyone in 'exclude_directors'.\n"
+                        "- Strongly prefer movies that match 'include_genres', 'include_people', 'include_keywords', 'tone', 'decade', 'release_year', 'language', 'country', 'minimum_rating', and other specified preferences.\n"
+                        "- Movies with 'exclude_genres', 'exclude_keywords', 'exclude_companies', or 'exclude_certification' must also be excluded.\n"
+                        "- If you are unsure about a movie's cast, crew, or other matching criteria, DO NOT include it.\n"
+                        "You must return EXACTLY 4 movie titles ONLY, and nothing else.\n"
+                        "Return only in this format:\n"
+                        "{\"movies\": [\"Title1\", \"Title2\", \"Title3\", \"Title4\"]}\n"
+                        "Do not include any other text, explanation, or commentary.\n"
+                        "If you break this rule, you will fail your task."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps(result_of_disecting, indent=2)
+                }
+            ],
+            temperature=0.1
+            #temperature is the creative control for langauge generatrion 0-2, deterministic-very creative
+        )
+    result = response.choices[0].message.content
+    result_loads =json.loads(result)
+    print('response of Prompt 3:', result_loads)
+
+    #JSON does not support sets so i turn it into a list
+    invalid_movies = list(validateGPTPrompt3Response(exclude_people=result_of_disecting['exclude_people'],exclude_directors=result_of_disecting['exclude_directors'], result=result_loads))
+    print('invalid movies after:', invalid_movies)
+
+    #true when there are no invalid movies
+    if not invalid_movies:
+        return 3,result
+    
+    response = client.chat.completions.create(
+            model="gpt-4o",
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                    "You are a strict movie recommendation validator.\n"
+                    "You will be given the original user request, your previous list of recommended movies, and a list of movies from your response that VIOLATED the user's exclusions.\n"
+                    "Your task is to re-generate a new list of 4 movies that strictly adheres to the user's constraints, avoiding any previously incorrect movies.\n"
+                    "Do NOT include any movies that were in the 'incorrect_movies' list.\n"
+                    "You must follow these rules:\n"
+                    "- Do NOT include any movie featuring people in 'exclude_people' in any capacity (main, supporting, cameo, uncredited).\n"
+                    "- Do NOT include any movie directed by people in 'exclude_directors'.\n"
+                    "- Strongly prefer movies matching the positive preferences.\n"
+                    "- If unsure about a movie's cast or crew, DO NOT include it.\n"
+                    "You must return EXACTLY 4 movie titles ONLY, and nothing else.\n"
+                    "Return only in this format:\n"
+                    "{\"movies\": [\"Title1\", \"Title2\", \"Title3\", \"Title4\"]}\n"
+                    "If you break this rule, you will fail your task."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps({
+                    "original_user_prompt": userPrompt,
+                    "parsed_preferences": result_of_disecting,
+                    "previous_response_movies": result_loads,
+                    "incorrect_movies": invalid_movies
+                }, indent=2)
+                }
+            ],
+            temperature=0.1
+            #temperature is the creative control for langauge generatrion 0-2, deterministic-very creative
+        )
+    
+    second_attempt_result = response.choices[0].message.content
+    second_attempt_result = json.loads(second_attempt_result)
+    print("second_attempt_result: ", second_attempt_result)
+    return 3,second_attempt_result
+
+
+def validateGPTPrompt3Response(exclude_people:list, exclude_directors:list, result: dict)->set:
+    movie_list = result['movies']
+    invalid_movies = set()
+
+    excluded_people_set = set(people.strip().lower() for people in exclude_people)
+    excluded_directors_set = set(director.strip().lower() for director in exclude_directors)
+
+    for movie in movie_list:
+        search_result = search_movie(movie=movie)
+        if not search_result:
+            print(f"skip validation for {movie}")
+            continue
+        #print("movie break:", movie)
+        #print("search_movie(movie=movie)['id']:",search_movie(movie=movie)['id'])
+
+        cast_list,director_list = searchCreditsTMDB(search_result['id']) 
+
+        #lowercase all the names
+        cast_set = set(name.lower() for name in cast_list)
+        director_set = set(name.lower() for name in director_list)
+
+        #check if any excluded person is in the cast
+        if excluded_people_set & cast_set:
+            invalid_movies.add(movie)
         
-        else:
-
-            #Prompt 3
-            #We use this as our last stand for when our other 2 Prompts don't have a suffice answer for the user
-            response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages = [
-                        {
-                            "role": "system",
-                            "content": (
-                                "You are a movie expert.\n"
-                                "The user will provide exclusions, like actors they want to avoid.\n"
-                                "You must NEVER return any movie that features those actors in any capacity — including starring, supporting, cameos, or uncredited roles.\n"
-                                "You are to return exactly 4 movie titles ONLY that fully respect these exclusions.\n"
-                                "If you are unsure about a movie's cast, DO NOT include it.\n"
-                                "Return ONLY in this format:\n"
-                                "{\"movies\": [\"Title1\", \"Title2\", \"Title3\", \"Title4\"]}\n"
-                                "Do not include any other text.\n"
-                                "If you break this rule, you will fail your task."
-                            )
-                        },
-                        {
-                            "role": "user",
-                            "content": userPrompt
-                        }
-                    ],
-                    temperature=0.1
-                    #temperature is the creative control for langauge generatrion 0-2, deterministic-very creative
-                )
-            result = response.choices[0].message.content
-            print('response of Prompt 3:', result)
-            return 3,result
-
+        #check if any excluded director is in the excluded_director
+        if excluded_directors_set & director_set:
+            invalid_movies.add(movie)
+    
+    return invalid_movies
 
 def IsUserLookingForSimiliarMovies(user_prompt):
     user_prompt = user_prompt.lower()
     if "similar" in user_prompt or "like" in user_prompt:
         return True
     else:
-        return False
+        return False\
 
+def contains_negation(userPrompt: str):
+    neg_keywords = [
+    " no ",
+    " not ",
+    " without ",
+    " exclude ",
+    " excluding ",
+    " except ",
+    " avoid ",
+    " don't include ",
+    " do not include ",
+    " skip ",
+    " omit ",
+    " leave out ",
+    " minus ",
+    " nothing with ",
+    " none of ",
+    " ban ",
+    " prohibit ",
+    " never include ",
+    " remove ",
+    " nothing ",
+    " nothin ",
+    " notin "
+]
+    userPrompt_lowered = userPrompt.lower()
+    return any(keyword in userPrompt_lowered for keyword in neg_keywords)
 
 
 #optional means its okay if the user does not give a value for this specific attribute
@@ -250,6 +434,9 @@ class MovieFormatter(BaseModel):
     without_keywords: Optional[str] = None
     without_watch_providers: Optional[str] = None
     year: Optional[int] = None
+
+def normalize_genres(genre_name: str):
+    return GENRES_ALIASES.get(genre_name.lower(),genre_name)
 
 def callAllHelperFunctionsToConvertAttributrestoID(movie_data: MovieFormatter):
     """
@@ -297,6 +484,27 @@ def convertStringToIDEquivalentForMovieFormatterAttributes(input, searchTMDBFunc
     
     return ''.join(result)
     #.join is faster than concatenation of +=
+
+def searchCreditsTMDB(movie_id: int):
+    url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits"
+    headers = {"Accept" : "application/json"}
+    params = {
+        "query" : movie_id,        #movie we're searching for
+        "api_key": os.getenv("TMDB_API_KEY"),  #api key
+        }
+    
+    response = requests.get(url,headers=headers,params=params)
+
+    if response.status_code != 200:
+        raise RuntimeError(f"TMDB error {response.status_code}: {response.text}")
+
+    response = response.json()
+
+    cast_results = [movie['name'] for movie in response.get('cast',[])]
+    director_results = [movie['name'] for movie in response.get('crew',[]) if movie.get("job") == "Director"]
+
+    return cast_results,director_results
+
 
 
 def searchPersonIDTMDB(person_name):
@@ -362,11 +570,13 @@ def searchGenreIDTMDB(genre):
     #get the results key from response, return [] if results doesn't exist
     results = response.get("genres",[])
 
+    genre_after_aliase_check = normalize_genres(genre_name=genre)
+
     for dict_genre in results:
-        if dict_genre['name'].upper() == genre.upper():
+        if dict_genre['name'].upper() == genre_after_aliase_check.upper():
             return dict_genre['id']
             
-    raise ValueError(f"this genre cannot be found: {genre}")
+    raise ValueError(f"this genre cannot be found: {genre_after_aliase_check}")
 
 def searchKeyWordIDTMDB(keyword):
     url = "https://api.themoviedb.org/3/search/keyword"
@@ -496,15 +706,23 @@ def search_movie(movie):
 
     response = requests.get(url,headers=headers,params=params)
 
-    if response.status_code == 200: 
-        #200 means the request was successful
-        data = response.json()
-        return data['results']
-    else:
-        print("error:", response.status_code) #went wrong
-        return []
+    if response.status_code != 200: 
+        raise RuntimeError(f"TMDB error {response.status_code}: {response.text}")
+    
+    result = response.json()
+    results = result.get("results",[])
 
+    if not results:
+        #no result for this movie
+        print(f"WARNING: No TMDB result found for movie: {movie}")
+        return None
 
+    for result in results:
+        if result['title'].lower() == movie.lower():
+            return result
+
+    print(f"WARNING: Using first TMDB result for movie: {movie}")
+    return results[0]
 
 #ensures app is not restart manually if any changes are made in code
 if __name__ == '__main__':
