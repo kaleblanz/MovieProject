@@ -81,6 +81,60 @@ function fetchRecommendationForUserMoviePrompt(submissionEvent){
 
       .then(data => {
         console.log("Rec movies:",data)
+
+        //get the container to whre the movie cards will be displayed, id = "movieResults"
+        const movieContainer = document.querySelector("#movieResults");
+
+        movieContainer.innerHTML = ""; //clear old results
+        
+        //data.movies bc thats the key in the json dict
+        data.movies.forEach(movie => {
+          //create a new div to represent each single movie card
+          const movie_card = document.createElement("div");
+
+          //asign this class movie-card to all movie cards for CSS styling
+          movie_card.classList.add("movie-card");
+
+          //date of the movie was released
+          const dateOfMovie = movie.release_date;
+
+          //create a Data Object
+          const dateObj = new Date(dateOfMovie)
+
+          //format the data
+          const human_readable_data = dateObj.toLocaleDateString('en-US',{
+            year: "numeric",
+            month : "short",
+            day : "numeric"
+          })
+
+          //defines the inner html that will be dynamically be placed on the home page
+          movie_card.innerHTML = `
+            <img class="movie-poster" src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+            <div class="movie-info">
+              <h3>${movie.title}</h3>
+              <h4>Average Rating: ${movie.vote_average}</h4>
+              <h4>Release Date: ${human_readable_data}</h4>
+              <p>${movie.overview}</p>
+              <button class="toggle-button">Show More</button>
+            </div>`;
+          
+          //get the "Show More" button tjat was added to the movie card
+          const toggleButton = movie_card.querySelector(".toggle-button");
+          
+          //add a click event to the button so it can expand/collapse the movie descrip
+          toggleButton.addEventListener("click", () => {
+            //togggle the "expand" class on the movie card
+            movie_card.classList.toggle("expanded");
+
+            //change button text based on wheteher the card is expanded or not
+            toggleButton.textContent = movie_card.classList.contains("expanded")
+             ? "Show Less" : "Show More";
+          });
+
+          //add the finished movie card product to the movieContainer div to the html page
+          movieContainer.appendChild(movie_card);
+        });
       })
 
       

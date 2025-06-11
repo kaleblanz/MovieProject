@@ -121,13 +121,14 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 
 /*each indiviual slide*/
 .swiper-slide{
-  background: white; /*white background for each slide*/
+  background: rgb(83, 80, 80); /*white background for each slide*/
   border-radius: 10px; /*round corners*/
   text-align: center; /*cetner poster and title*/
   width: 300px; /*fixed width*/
   flex-shrink: 0; /*prevent shrinking in container */
   margin: 0 auto; /*center movie slide inside caresoul*/
   box-shadow: 0 4px 10px hsla(0, 6%, 37%, 0.15); /*drop shadow*/
+  color: white;
   }
 
   /*movie poster inside each slide, from inner html in js*/
@@ -175,4 +176,99 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 
 #submitButtonForPromptBox{
   background-color: rgb(106, 236, 106);
+}
+
+
+
+
+
+
+
+/*the reccomended movies for the user*/
+/*container holding all recommened movie cards, id=movieResults*/
+#movieResults {
+  display: flex; /*flexbox layout*/
+  flex-wrap: wrap; /*allows movie cards to wrap to next line*/
+  gap: 35px; /*space between cards*/
+  justify-content: center; /*center horiz*/
+  margin-top: 20px; /*space above container*/
+  margin-bottom: 60px; /*space below container*/
+}
+
+/*.movie-card is the class added to each movie card, each individ movie card*/
+.movie-card {
+  background: linear-gradient(135deg, #5804a7, #5c4d5f, #532517, #740202); /*gradient background*/
+  animation: gradientShift 5s ease-in-out infinite; /*animate the colors moving*/
+  background-size: 300% 300%; /*make the background layer larger for animation*/
+  color: white; /*text color*/
+  width: 220px; /*fixed width for movie cards*/
+  border-radius: 16px; /*rounded corners*/
+  overflow: hidden; /*hide overflow content*/
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /*shadow for depth*/
+  display: flex; /*flexbox layout inside card*/
+  flex-direction: column; /*stack child elements vertically*/
+  align-items: center; /*center child elements horiz*/
+  text-align: center; /*center text*/
+  position: relative; /*positioning children*/
+  padding-bottom: 10px; /*space below content*/
+  transition: height 0.3s ease; /*smooth height change*/
+  min-height: 420px; /*min height of card*/
+  height: auto; /*let height adjust to contetn*/
+}
+
+/*keyframes for gradient shift, moves background horiz to create shifting effect*/
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/*targets any <img> tag in the movie-card class*/
+.movie-card img {
+  width: 100%; /*makes img fill card width*/
+  border-bottom: 4px solid #1a1919; /*thin line below image*/
+}
+
+/*targets any <h3> tags in the movie-card class*/
+.movie-card h3 {
+  font-size: 1.1rem; 
+  margin: 10px 10px 5px; /*space around title (top, sides, bottom)*/
+}
+
+/*targets any <p> in the movie-card class*/
+.movie-card p {
+  font-size: 0.85rem;
+  margin: 0 10px; /*left and right margin*/
+  line-height: 1.4; /*line spacing*/
+  max-height: 4.2em; /* 3 lines */
+  overflow: hidden;
+  text-overflow: ellipsis; /*show "..." for overflow*/
+  display: -webkit-box; /*use flexable box for multiline truncation*/
+  -webkit-line-clamp: 3; /*show 3 lines*/
+  -webkit-box-orient: vertical; /*vertical oritention of the box*/
+  transition: max-height 0.4s ease; /*smooth expand/colapse*/
+}
+
+/*expanded state for description*/
+.movie-card.expanded p {
+  max-height: 300px; /* large max height to expand for full text */
+  -webkit-line-clamp: unset; /*disable line clamp*/
+}
+
+/*style the "Show  More/Show Less toggle button*/
+.toggle-button {
+  background: none; 
+  color: #ccc;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 6px; /*space above the button*/
+  text-decoration: underline;
+  font-weight: bold;
+  font-style: italic;
+}
+
+
+.movie-card:hover {
+  transform: scale(1.05); /*scale the card +5% when hovering over*/
 }
