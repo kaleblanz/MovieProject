@@ -129,6 +129,8 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   margin: 0 auto; /*center movie slide inside caresoul*/
   box-shadow: 0 4px 10px hsla(0, 6%, 37%, 0.15); /*drop shadow*/
   color: white;
+ 
+  
   }
 
   /*movie poster inside each slide, from inner html in js*/
@@ -168,16 +170,72 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 
 
 /*prompt box in home screen*/
-#PromptBox{
-  background-color: rgb(241, 183, 183);
-  width: 1000px;
-  height: 80px;
+#PromptBox {
+  background: linear-gradient(135deg, #2c003e, #3f2b96, #5c4d5f); /*diagonal gradient background*/
+  background-size: 300% 300%; /*makes the background layer larger than the element to allow the gradient shift*/
+  animation: gradientShift 6s ease infinite; /*animates the shift*/
+
+  /*takes up 90% of parents width but never exceeds 800px*/
+  width: 90%;
+  max-width: 800px;
+
+  /*height of box*/
+  height: 130px;
+
+  color: #e0e0e0;
+  font-size: 1.1rem;
+  font-family: 'Segoe UI', sans-serif; /*font inside the box*/
+
+  border: 2px solid #7d2ff3; /*adds the purple border around the text box*/
+  border-radius: 14px; /*rounds the corners of the box*/
+  padding: 14px; /*adds space between text and edge of the box*/
+  margin: 20px auto; /*adds vertical space around the box and centers it horiz*/
+  display: block; /*makes elem a block-level elem so it takes up the fill line*/
+  resize: vertical; /*user can only resize the box verticaly and not horiz*/
+
+  box-shadow: 0 4px 14px rgba(92, 19, 138, 0.6);/*gives a purple glow around the box to give depth*/
+  transition: all 0.3s ease; /*animates the property changes*/
 }
 
-#submitButtonForPromptBox{
-  background-color: rgb(106, 236, 106);
+/*hovering over changes the drop shadow and border color*/
+#PromptBox:hover {
+  border-color: #cd5ef8; /*change color to brighter purple when user clicked/focuses on the box*/
+  box-shadow: 0 0 16px rgba(153, 56, 200, 0.7);/*increase glow effect when clicked/focused*/
+  outline: none; /*removes the default blue outlines that browers show on focused elems*/
 }
 
+
+/*applies ONLY when the textaarea is clicked/focused on by the user*/
+#PromptBox:focus {
+  border-color: #dc8dfc; /*change color to brighter purple when user clicked/focuses on the box*/
+  box-shadow: 0 0 16px rgba(200, 96, 255, 0.9);/*increase glow effect when clicked/focused*/
+  outline: none; /*removes the default blue outlines that browers show on focused elems*/
+}
+
+
+
+/*submit button for the prompt box*/
+#submitButtonForPromptBox {
+  background: linear-gradient(135deg, #38b000, #4ade80, #00ffcc);
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
+
+  color: black;
+  font-weight: bold;
+  border: none; /*removes the default border*/
+  border-radius: 10px; /*rounds the corners*/
+  padding: 12px 24px; /*adds space inside the button : 12px top/bottom, 24px left/right*/
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 10px 12px 10px 0; /*10px top/bottom, 12px right, 0 left*/
+
+  box-shadow: 0 4px 10px rgba(0, 255, 133, 0.8); /**/
+  transition: transform 0.3s ease;
+}
+
+#submitButtonForPromptBox:hover {
+  transform: scale(1.1);
+}
 
 
 

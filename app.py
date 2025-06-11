@@ -81,6 +81,7 @@ def currentPopularMovies():
         "page" : 1,
         "sort_by" : "popularity.desc",
         "vote_count.gte" : 150
+
     }
     response = requests.get(url,headers=headers,params=params)
 
