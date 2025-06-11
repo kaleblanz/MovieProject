@@ -36,8 +36,13 @@ GENRES_ALIASES = {
     "superhero": "Action",
     "superheroes": "Action",
     "sci fi": "Science Fiction",
-    "sci_fi": "Science Fiction"
+    "sci_fi": "Science Fiction",
+    "romantic" : "Romance"
 }
+
+REASON_TMDB = 1
+REASON_SIMILIAR = 2
+REASON_NEGATION = 3
 
 #this route decorator connects this url to homeFunc()
 #whatever is returned is what the visitor sees in their browser
@@ -74,7 +79,8 @@ def currentPopularMovies():
         "language" : "en-US",
         "api_key": os.getenv("TMDB_API_KEY"),  #api key
         "page" : 1,
-        "sort_by" : "popularity.desc"
+        "sort_by" : "popularity.desc",
+        "vote_count.gte" : 150
     }
     response = requests.get(url,headers=headers,params=params)
 
@@ -95,17 +101,60 @@ def MovieRecommendationForUserEndPoint():
     print('the users prompt: ',userPrompt)
     flag,movie_data = direct_user_prompt(userPrompt)
     #flag variable describes which prompt was taken
-    #flag= -> 
-    #flag= -> 
+    #flag= 1 -> uses the TMDB search
+    #flag= 2 -> uses our similiar method using GPT 4o
+    #flag= 3 -> uses multiple checks and searches using GPT 4o and language checks
     if flag == 1:
-        pass
+        recommendation = discoverUsersRecommendationFromPrompt(movie_data)
+        if not recommendation or len(recommendation) == 0:
+            return jsonify({
+            "movies": [],
+            "flag": flag,
+            "error": "No movies found from TMDB."
+        }), 500
+        print("recommendation: ", recommendation)
 
-    else: #flag = 0
-        pass
+        movies = []
+        for movie_i in range(min(len(recommendation), 4)):
+            movies.append(recommendation[movie_i])
 
-    #print(movie_data)
-    #print(discoverUsersRecommendationFromPrompt(movie_data))
-    return jsonify(userPrompt) 
+        return jsonify({
+            "movies" : movies,
+            "flag" : flag
+        })
+
+    elif flag == 2: 
+        similar_movies = searchSimilarMoviesTMDB(movie_id=search_movie(movie=movie_data)['id'])
+        #print(f"movies similiar to: {movie_data} are: {similar_movies}")
+        if not similar_movies or len(similar_movies) == 0:
+            return jsonify({
+            "movies": [],
+            "flag": flag,
+            "error": "No movies found from TMDB."
+        }), 500
+
+        movies = []
+        for movie_i in range(min(len(similar_movies), 4)):
+            movies.append(similar_movies[movie_i])
+
+        return jsonify({
+            "movies" : movies,
+            "flag" : flag
+        })
+
+
+    else: #flag = 3
+        movies = []
+
+        print(f"flag: {flag}, and the movie_data: {movie_data}")
+        for movie in movie_data['movies']:
+            movie_info = search_movie(movie=movie)
+            movies.append(movie_info)
+    
+        return jsonify({
+            "movies" : movies,
+            "flag" : flag
+        })
 
 
 def direct_user_prompt(userPrompt: str):
@@ -122,13 +171,19 @@ def direct_user_prompt(userPrompt: str):
     #initilize openAI object
     client = OpenAI(api_key=api_key)
 
-    if contains_negation(userPrompt=userPrompt):
-        return 3,GPT_PROMPT3(client=client,userPrompt=userPrompt)
+    if contains_negation(userPrompt):
+        for attempt in range(2):
+            result = GPT_PROMPT3(client=client, userPrompt=userPrompt)
+            if "error" not in result:
+                return REASON_NEGATION, result
+            print(f"PROMPT3 failed on attempt {attempt+1}")
+        print(f"Falling back to PROMPT1 after PROMPT3 failures for prompt: {userPrompt}.")
+        return REASON_TMDB,GPT_PROMPT1(client=client, userPrompt=userPrompt)
 
     if IsUserLookingForSimiliarMovies(user_prompt=userPrompt):
-        return 2,GPT_PROMPT2(client=client,userPrompt=userPrompt)
-    
-    return 1,GPT_PROMPT1(client=client,userPrompt=userPrompt)
+        return REASON_SIMILIAR,GPT_PROMPT2(client=client, userPrompt=userPrompt)
+
+    return REASON_TMDB,GPT_PROMPT1(client=client, userPrompt=userPrompt)
 
 
 
@@ -154,7 +209,12 @@ def GPT_PROMPT1(client: OpenAI, userPrompt: str):
             "Format your response strictly as a JSON object that fits the MovieFormatter BaseModel, do include extra text or explanation."
 
             "If the users prompt is asking for movies 'similar to' or 'like' another movie (example: 'give me a movie similar to Fight Club'), "
-            "do NOT try to match filters or fill any fields. Instead, leave all fields as `None`."},
+            "do NOT try to match filters or fill any fields. Instead, leave all fields as `None`."
+
+            "Only use official TMDB genre names. Do not combine genres into hybrid names like 'Romantic Comedy' or 'Action-Comedy'."
+            "Use only genres from this list exactly as shown:  "
+            "Action, Adventure, Animation, Comedy, Crime, Documentary, Drama, Family, Fantasy, History, Horror, Music, Mystery, Romance, Science Fiction, TV Movie, Thriller, War, Western."
+            },
             
             {"role": "user", "content": userPrompt}
         ],
@@ -165,13 +225,13 @@ def GPT_PROMPT1(client: OpenAI, userPrompt: str):
     movie_data = callAllHelperFunctionsToConvertAttributrestoID(response.output_parsed)
 
     #returns an instance of my MovieFormatter Pydantic Model with the ID's as values
-    return 1,movie_data
+    return movie_data
 
 
 
 
 def GPT_PROMPT2(client: OpenAI, userPrompt: str):
-     #when we true we know the user is looking for a movie similiar to another
+    #when we true we know the user is looking for a movie similiar to another
     #Prompt 2
     response = client.responses.parse(
         model = "gpt-4o",
@@ -186,7 +246,7 @@ def GPT_PROMPT2(client: OpenAI, userPrompt: str):
     )
     #returns just the title of the movie the user wants a similiar movie too
     print('response of Prompt 2:',response.output_text)
-    return 2,response.output_text
+    return response.output_text
 
 def GPT_PROMPT3(client: OpenAI, userPrompt: str):
     #to disect the user's prompt 
@@ -238,13 +298,13 @@ def GPT_PROMPT3(client: OpenAI, userPrompt: str):
     #in the future, you have to handle these return statements for when this functions returns
     if not result_of_disecting.strip():
         print("GPT returned empty content")
-        return 3,{"error":"GPT returned empty result"}
+        return {"error":"GPT returned empty result"}
     try:
         result_of_disecting = json.loads(result_of_disecting)
         print('result of inspection:', result_of_disecting)
     except json.JSONDecodeError as e:
         print(f"WARNING: JSON decode error: {e} — content was: {result_of_disecting}")
-        return 3, {"error": "Invalid JSON in dissection result"}
+        return {"error": "Invalid JSON in dissection result"}
 
     
 
@@ -287,7 +347,7 @@ def GPT_PROMPT3(client: OpenAI, userPrompt: str):
 
     #true when there are no invalid movies
     if not invalid_movies:
-        return 3,result
+        return result
     
     response = client.chat.completions.create(
             model="gpt-4o",
@@ -327,7 +387,7 @@ def GPT_PROMPT3(client: OpenAI, userPrompt: str):
     second_attempt_result = response.choices[0].message.content
     second_attempt_result = json.loads(second_attempt_result)
     print("second_attempt_result: ", second_attempt_result)
-    return 3,second_attempt_result
+    return second_attempt_result
 
 
 def validateGPTPrompt3Response(exclude_people:list, exclude_directors:list, result: dict)->set:
@@ -632,7 +692,7 @@ def searchProviderIDTMDB(provider):
 def discoverUsersRecommendationFromPrompt(movie_data: MovieFormatter):
     url = "https://api.themoviedb.org/3/discover/movie"
     headers = {"Accept" : "application/json"}
-    params={"api_key" : os.getenv("TMDB_API_KEY")}
+    params={"api_key" : os.getenv("TMDB_API_KEY"), "vote_count.gte" : 150} 
 
     #loop through all key,value pairs in movie_data with values not None
     for key,value in movie_data.model_dump().items():
@@ -650,34 +710,27 @@ def discoverUsersRecommendationFromPrompt(movie_data: MovieFormatter):
     #results could be list of dictionarys or empty list
     return results
 
+def searchSimilarMoviesTMDB(movie_id: int):
+    url = f"https://api.themoviedb.org/3/movie/{movie_id}/recommendations"
+    #url = f"https://api.themoviedb.org/3/movie/{movie_id}/similar"
+    headers = {"Accept" : "application/json"}
+    params = {"api_key" : os.getenv("TMDB_API_KEY"), "vote_count.gte" : 150}
 
+    response = requests.get(url,headers=headers,params=params)
 
+    if response.status_code != 200:
+        raise RuntimeError(f"TMDB error {response.status_code}: {response.text}")
+    
+    result = response.json()
 
+    result = result.get('results',[])
 
-"""
-def aiscripting():
-    #load env variables from .env file
-    load_dotenv()
+    if not result:
+        print("TMDB has no similar movies")
+        return []
+    
+    return result
 
-    #get  the API key
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OPENAI KEY WAS NOT FOUND IN ENV")
-
-    #initialize the openai object
-    client = OpenAI(api_key=api_key)
-
-    #send prompt
-    response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "user", "content": "Write a one-sentence bedtime story about iron man."}
-    ]
-)
-
-    #print(response.choices[0].message.content)
-    return response.choices[0].message.content
-"""
 
 
 @app.route('/search/<string:movieTitle>') #movieTitle is a path parameter

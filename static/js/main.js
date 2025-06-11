@@ -53,6 +53,7 @@ function fetchPopularCarouselMoviesHomePage(){
 fetchPopularCarouselMoviesHomePage();
 
 
+
 /**
  * js intercepts the form submission for user prompt for movie recs.
  * fetches movie rec's via flask.
@@ -62,23 +63,36 @@ fetchPopularCarouselMoviesHomePage();
  */
 function fetchRecommendationForUserMoviePrompt(submissionEvent){
     submissionEvent.preventDefault();//this prevents the page from reloading
+
+    //get value from the input field with id="PromptBox"
     const userInput = document.querySelector("#PromptBox").value;
+
+
     fetch('/MovieRecForUserPrompt',{
       method: 'POST',
       headers:{
         'Content-Type':'application/json'
       },
       body:JSON.stringify({userPrompt: userInput})
+      //send the user input to backend as JSON
     })
       .then(response => response.json())
+      //parese the response as JSON when it comes back from the backend
+
       .then(data => {
         console.log("Rec movies:",data)
       })
+
+      
       .catch(err => console.error("error fetching movie recs for user", err));
+      //handle network or server errors
 }
 
 //wait for the Document Object Model to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
+  //once DOM is loaded, attach the even listener to the form
+
   //you pass the function with no args bc then the browser calls when the form is submitted and passing event obj automatically
-document.querySelector("form").addEventListener("submit",fetchRecommendationForUserMoviePrompt)
+  document.querySelector("form").addEventListener("submit",fetchRecommendationForUserMoviePrompt)
+  //attach the form submission evebt to the custom handler function
 })
