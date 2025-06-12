@@ -67,6 +67,9 @@ function fetchRecommendationForUserMoviePrompt(submissionEvent){
     //get value from the input field with id="PromptBox"
     const userInput = document.querySelector("#PromptBox").value;
 
+    //show a loading message as soon as the user submits a  prompt
+    //this gives user feedback that it's loading
+    showStatus("Fetching movie recommendations...", "loading");
 
     fetch('/MovieRecForUserPrompt',{
       method: 'POST',
@@ -82,6 +85,21 @@ function fetchRecommendationForUserMoviePrompt(submissionEvent){
       .then(data => {
         console.log("Rec movies:",data)
 
+        //when the movies are loaded, the black boarder is placed behind the movies cards
+        let background_of_recs = document.getElementById("movieResults")
+        Object.assign(background_of_recs.style, {
+        background: "rgba(25, 25, 25, 0.8)",
+        padding: "35px",
+        margin: "40px auto",
+        maxWidth: "1050px",
+        borderRadius: "18px",
+        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.8)",
+        textAlign: "center",
+        color: "#ffffff",
+        backdropFilter: "blur(6px)",
+        animation: "fadeInForm 1s ease forwards"
+      });
+
         //get the container to whre the movie cards will be displayed, id = "movieResults"
         const movieContainer = document.querySelector("#movieResults");
 
@@ -94,7 +112,7 @@ function fetchRecommendationForUserMoviePrompt(submissionEvent){
 
           //asign this class movie-card to all movie cards for CSS styling
           movie_card.classList.add("movie-card");
-
+          
           //date of the movie was released
           const dateOfMovie = movie.release_date;
 
@@ -135,12 +153,24 @@ function fetchRecommendationForUserMoviePrompt(submissionEvent){
           //add the finished movie card product to the movieContainer div to the html page
           movieContainer.appendChild(movie_card);
         });
+        //once all the movie cards have finishhed loading
+        //let the user know it was successful with showing the success box message
+        showStatus("Movies loaded successfully!", "success");
+
       })
 
       
-      .catch(err => console.error("error fetching movie recs for user", err));
-      //handle network or server errors
-}
+      .catch(err => {//handle network or server errors
+        console.error("error fetching movie recs for user", err);
+
+        //show the red error meessage if something failed
+        showStatus("Something went wrong. Please try again.", "error");
+      });
+      
+
+      
+
+    }
 
 //wait for the Document Object Model to be fully loaded
 document.addEventListener("DOMContentLoaded", () => {
@@ -150,3 +180,38 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector("form").addEventListener("submit",fetchRecommendationForUserMoviePrompt)
   //attach the form submission evebt to the custom handler function
 })
+
+
+
+
+/**
+ * shows a status message on the screen (success, loading, error)
+ * message: the text you want to display
+ * type: type of message (success, error, loading), defaults to 'success'
+ * duration: how long to show the message (in ms)
+ * @returns void
+ */
+function showStatus(message, type = "success", duration = 3000) {
+  //get the status message box
+  const statusBox = document.getElementById("statusMessage");
+
+  // Clear any previous styles
+  statusBox.className = '';
+
+  //add a new class based on the type(status-success or status-error)
+  statusBox.classList.add(`status-${type}`);
+
+  //set the text inside the box equal to our message
+  statusBox.textContent = message;
+
+  //makes the box visible
+  statusBox.style.display = 'block';
+
+  // if the type is not 'loading', hide the box after x amount of time
+  if (type !== 'loading') {
+    setTimeout(() => {
+      //hide the message in the box after duration
+      statusBox.style.display = 'none';
+    }, duration);
+  }
+}

@@ -25,11 +25,70 @@ header{
   }
 }
 
-/*title about carouesl of trending movies*/
-#titlePopMovies{
-  color: rgb(202, 96, 96);
+
+
+
+/*footer of the web app*/
+#site-footer {
+  background: rgba(20, 20, 40, 0.9);
+  padding: 20px 0;
+  color: #ccc;
   text-align: center;
+  font-size: 0.9rem;
+  border-top: 3px solid rgba(255, 255, 255, 0.1);
+  margin-top: 50px;
 }
+
+#site-footer a {
+  color: #a46efb;
+  text-decoration: none;
+  font-style: italic;
+  padding: 5px;
+}
+
+#site-footer a:hover {
+  text-decoration: underline;
+}
+
+
+
+
+
+
+
+
+/*title about carouesl of trending movies*/
+#titlePopMovies {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 2.5rem;
+  text-align: center;
+  margin: 40px 0 20px;
+
+  /* Gradient text effect */
+  background: linear-gradient(90deg, #d670ff, #a46efb, #5d46c7);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+
+  /* Subtle glowing effect */
+  text-shadow: 0 0 8px rgba(214, 112, 255, 0.5),
+               0 0 20px rgba(144, 86, 255, 0.3);
+
+  animation: fadeInTitle 1.3s ease-in-out both;
+}
+
+@keyframes fadeInTitle {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 body{
     /*the menu wraps around the whole line*/
@@ -117,6 +176,21 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   padding-top: 20px; /*padding above*/
   padding-bottom: 40px; /*padding above*/
   box-sizing: border-box; /*includes padding in width calculations*/
+
+
+}
+
+.background-for-carousel{
+  background: rgba(25, 25, 25, 0.8);
+  padding: 15px;
+  margin: 40px auto;
+  max-width: 880px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+  animation: fadeInForm 1s ease forwards;
 }
 
 /*each indiviual slide*/
@@ -129,7 +203,6 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   margin: 0 auto; /*center movie slide inside caresoul*/
   box-shadow: 0 4px 10px hsla(0, 6%, 37%, 0.15); /*drop shadow*/
   color: white;
- 
   
   }
 
@@ -139,6 +212,7 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   height: auto; /*keep image same ratio*/
   border-radius: 10px 10px 0 0; /*round top corners of poster only*/
   padding-top: 50px; /*space above image*/
+
   }
 
 /*text area below each poster*/
@@ -149,7 +223,7 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 
   /*hovering over a slide*/
 .swiper-slide:hover{
-  transform: scale(1.1); /*enlarge the slide by x1.1*/
+  transform: scale(1.05); /*enlarge the slide by x1.1*/
   transition: transform 0.3s ease; /*smooth scaling transition*/
 }
 
@@ -180,7 +254,7 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   max-width: 800px;
 
   /*height of box*/
-  height: 130px;
+  height: 150px;
 
   color: #e0e0e0;
   font-size: 1.1rem;
@@ -189,12 +263,13 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   border: 2px solid #7d2ff3; /*adds the purple border around the text box*/
   border-radius: 14px; /*rounds the corners of the box*/
   padding: 14px; /*adds space between text and edge of the box*/
-  margin: 20px auto; /*adds vertical space around the box and centers it horiz*/
+  margin: 10px auto; /*adds vertical space around the box and centers it horiz*/
   display: block; /*makes elem a block-level elem so it takes up the fill line*/
   resize: vertical; /*user can only resize the box verticaly and not horiz*/
 
   box-shadow: 0 4px 14px rgba(92, 19, 138, 0.6);/*gives a purple glow around the box to give depth*/
   transition: all 0.3s ease; /*animates the property changes*/
+  
 }
 
 /*hovering over changes the drop shadow and border color*/
@@ -214,6 +289,9 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 
 
 
+
+
+
 /*submit button for the prompt box*/
 #submitButtonForPromptBox {
   background: linear-gradient(135deg, #38b000, #4ade80, #00ffcc);
@@ -229,7 +307,7 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   cursor: pointer;
   margin: 10px 12px 10px 0; /*10px top/bottom, 12px right, 0 left*/
 
-  box-shadow: 0 4px 10px rgba(0, 255, 133, 0.8); /**/
+  box-shadow: 0 4px 10px rgba(0, 255, 133, 0.8); /*drop shadow*/
   transition: transform 0.3s ease;
 }
 
@@ -237,7 +315,63 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   transform: scale(1.1);
 }
 
+/*rest button for the prompt box*/
+#resetButtonForPromptBox {
+  background: linear-gradient(135deg, #f3491e, #ff2802, #b40202);
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
 
+  color: black;
+  font-weight: bold;
+  border: none; /*removes the default border*/
+  border-radius: 10px; /*rounds the corners*/
+  padding: 12px 24px; /*adds space inside the button : 12px top/bottom, 24px left/right*/
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 10px 12px 10px 0; /*10px top/bottom, 12px right, 0 left*/
+
+  box-shadow: 0 4px 10px rgba(238, 29, 14, 0.8); /*drop shadow*/
+  transition: transform 0.3s ease;
+}
+
+#resetButtonForPromptBox:hover {
+  transform: scale(1.1);
+}
+
+/*class = button-container-for-prompt, centers the sumbit and reset buttons*/
+.button-container-for-prompt{
+  display: flex; /*use flexbox to arrange children*/
+  justify-content: center; /*horiz center the buttons*/
+  gap: 10px;
+  margin-top: 1px;
+}
+
+
+/*id=form-for-user-prompt, creates a background behind the textbox*/
+#form-for-user-prompt {
+  background: rgba(25, 25, 25, 0.8);
+  padding: 35px;
+  margin: 40px auto;
+  max-width: 880px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+
+  text-align: center;
+  color: #ffffff;
+
+  backdrop-filter: blur(6px);
+  animation: fadeInForm 1s ease forwards;
+}
+
+/*label for text bod*/
+#form-for-user-prompt label {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 0 40px #8f44fd;
+}
 
 
 
@@ -251,6 +385,7 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   justify-content: center; /*center horiz*/
   margin-top: 20px; /*space above container*/
   margin-bottom: 60px; /*space below container*/
+
 }
 
 /*.movie-card is the class added to each movie card, each individ movie card*/
@@ -284,7 +419,6 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 /*targets any <img> tag in the movie-card class*/
 .movie-card img {
   width: 100%; /*makes img fill card width*/
-  border-bottom: 4px solid #1a1919; /*thin line below image*/
 }
 
 /*targets any <h3> tags in the movie-card class*/
@@ -330,3 +464,40 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 .movie-card:hover {
   transform: scale(1.05); /*scale the card +5% when hovering over*/
 }
+
+
+
+
+
+/*id=statusMessage, the temporary message when error or loading recomened movies*/
+#statusMessage {
+  text-align: center;
+  font-size: 1.1rem;
+  margin: 15px auto;
+  padding: 10px 20px;
+  border-radius: 12px;
+  max-width: 700px;
+  transition: all 0.3s ease;
+}
+
+/* for when the status is an error */
+.status-error {
+  color: #fff;
+  background-color: #dd3d38;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+}
+
+/* for when the status is a success */
+.status-success {
+  color: #ffffff;
+  background-color: #4fc74f;
+  box-shadow: 0 0 10px rgba(0, 255, 128, 0.7);
+}
+
+/* for when the status is loading */
+.status-loading {
+  color: #000;
+  background-color: #e0e069;
+  box-shadow: 0 0 10px rgba(255, 255, 0, 0.7);
+}
+

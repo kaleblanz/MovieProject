@@ -146,9 +146,10 @@ def MovieRecommendationForUserEndPoint():
 
     else: #flag = 3
         movies = []
-
+        print("movie_data loads: ",json.loads(movie_data))
+        movies_from_movie_data = json.loads(movie_data)['movies']
         print(f"flag: {flag}, and the movie_data: {movie_data}")
-        for movie in movie_data['movies']:
+        for movie in movies_from_movie_data:
             movie_info = search_movie(movie=movie)
             movies.append(movie_info)
     
@@ -173,7 +174,7 @@ def direct_user_prompt(userPrompt: str):
     client = OpenAI(api_key=api_key)
 
     if contains_negation(userPrompt):
-        for attempt in range(2):
+        for attempt in range(3):
             result = GPT_PROMPT3(client=client, userPrompt=userPrompt)
             if "error" not in result:
                 return REASON_NEGATION, result
@@ -271,6 +272,8 @@ def GPT_PROMPT3(client: OpenAI, userPrompt: str):
                 '  "exclude_keywords": [],\n'
                 '  "include_directors": [],\n'
                 '  "exclude_directors": [],\n'
+                '  "include_movies": [],\n'
+                '  "exclude_movies": [],\n'
                 '  "tone": "",  // e.g. dark, uplifting, funny, feel-good\n '
                 '  "decade": "",\n'
                 '  "release_year": "",\n'
@@ -343,7 +346,8 @@ def GPT_PROMPT3(client: OpenAI, userPrompt: str):
     print('response of Prompt 3:', result_loads)
 
     #JSON does not support sets so i turn it into a list
-    invalid_movies = list(validateGPTPrompt3Response(exclude_people=result_of_disecting['exclude_people'],exclude_directors=result_of_disecting['exclude_directors'], result=result_loads))
+    invalid_movies = list(validateGPTPrompt3Response(exclude_people=result_of_disecting['exclude_people'],exclude_directors=result_of_disecting['exclude_directors'], 
+                                                     exclude_movies=result_of_disecting['exclude_movies'], included_people=result_of_disecting['include_people'],result=result_loads))
     print('invalid movies after:', invalid_movies)
 
     #true when there are no invalid movies
@@ -391,7 +395,7 @@ def GPT_PROMPT3(client: OpenAI, userPrompt: str):
     return second_attempt_result
 
 
-def validateGPTPrompt3Response(exclude_people:list, exclude_directors:list, result: dict)->set:
+def validateGPTPrompt3Response(exclude_people:list, exclude_directors:list, exclude_movies:list, included_people:list, result: dict)->set:
     movie_list = result['movies']
     invalid_movies = set()
 
@@ -399,6 +403,8 @@ def validateGPTPrompt3Response(exclude_people:list, exclude_directors:list, resu
     excluded_directors_set = set(director.strip().lower() for director in exclude_directors)
 
     for movie in movie_list:
+        if movie in exclude_movies:
+            invalid_movies.add(movie)
         search_result = search_movie(movie=movie)
         if not search_result:
             print(f"skip validation for {movie}")
@@ -419,6 +425,10 @@ def validateGPTPrompt3Response(exclude_people:list, exclude_directors:list, resu
         #check if any excluded director is in the excluded_director
         if excluded_directors_set & director_set:
             invalid_movies.add(movie)
+        
+        #for people in included_people:
+            #if people not in cast_list:
+                #invalid_movies.add(movie)
     
     return invalid_movies
 
@@ -693,7 +703,7 @@ def searchProviderIDTMDB(provider):
 def discoverUsersRecommendationFromPrompt(movie_data: MovieFormatter):
     url = "https://api.themoviedb.org/3/discover/movie"
     headers = {"Accept" : "application/json"}
-    params={"api_key" : os.getenv("TMDB_API_KEY"), "vote_count.gte" : 150} 
+    params={"api_key" : os.getenv("TMDB_API_KEY"), "vote_count.gte" : 150, "sort_by" : "vote_average.desc"} 
 
     #loop through all key,value pairs in movie_data with values not None
     for key,value in movie_data.model_dump().items():
