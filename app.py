@@ -12,6 +12,11 @@ from typing import Optional
 #for splitting a string with mutiple characters
 import re
 
+#SQLAlchemy will translate our python commands into SQL and PostgreSQL server runs them
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
+from sqlalchemy.orm import sessionmaker, declarative_base
+from db import SessionLocal
+
 
 #request vs requests:
 #request from Flask is for incoming HTTP requests to my flask server
@@ -19,6 +24,15 @@ import re
 
 #app object resprents our web app, instance of flask class
 app = Flask(__name__)
+
+
+
+
+
+
+db = SessionLocal()
+
+
 
 
 GENRES_ALIASES = {
