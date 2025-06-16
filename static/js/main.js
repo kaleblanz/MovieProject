@@ -215,3 +215,81 @@ function showStatus(message, type = "success", duration = 3000) {
     }, duration);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Enables toggling password visibility by clicking an eye icon.
+ * Takes the IDs of the password input and toggle button as parameters.
+ * @param passwordInputId
+ * @param toggleButtonId
+ * @returns void
+ */
+function enablePasswordToggle(passwordInputId, toggleButtonId) {
+  // PasswordInput contains a reference to the HTML <input> tag with the given id
+  const passwordInput = document.getElementById(passwordInputId);
+  
+  // TogglePasswordBtn contains a reference to the HTML <button> tag with the given id
+  const togglePasswordBtn = document.getElementById(toggleButtonId);
+
+  // Safety check: if either element is not found, stop executing this function
+  if (!passwordInput || !togglePasswordBtn) return; 
+
+  // Find the "eye open" icon inside the toggle button
+  const eyeOpenIcon = togglePasswordBtn.querySelector('.eye-open');
+
+  // Find the "eye closed" icon inside the toggle button
+  const eyeClosedIcon = togglePasswordBtn.querySelector('.eye-closed');
+
+  // Add an event listener on the eye toggle button
+  togglePasswordBtn.addEventListener('click', () => {
+
+    // We are changing the type attribute of the <input> tag:
+    // type = 'text' shows the password text
+    // type = 'password' hides the password text
+
+    // Check if the current input type is 'password'
+    if (passwordInput.type === 'password') {
+      // Change input type to 'text' to make the password visible
+      passwordInput.type = 'text';
+
+      // Show 'eye-open' icon (remove the hidden class from eyeOpenIcon)
+      eyeOpenIcon.classList.remove('hidden');
+
+      // Hide 'eye-closed' icon (add the 'hidden' class from eyeClosedIcon)
+      eyeClosedIcon.classList.add('hidden');
+
+    } else { // passwordInput.type === 'text'
+      // Change input type to 'password' to hide the password
+      passwordInput.type = 'password';
+
+      // Hide 'eye-open' icon (add the 'hidden' class from eyeOpenIcon)
+      eyeOpenIcon.classList.add('hidden');
+
+      // Show 'eye-closed' icon (remove the 'hidden' class from eyeClosedIcon)
+      eyeClosedIcon.classList.remove('hidden');
+    }
+  });
+}
+
+// Wait for the page to fully load the Document Object Model (DOM)
+document.addEventListener('DOMContentLoaded', () => {
+  // Call the function and pass the IDs of the password input and toggle button
+  enablePasswordToggle('password-login', 'toggle-password');
+});
+
+
+
+
+
+
+

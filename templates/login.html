@@ -35,14 +35,40 @@
 
         <!-- login form for user-->
         <form id="login-form">
+
+            <!-- email input box -->
             <label for="email-login">Enter Email:</label>
             <input type="email" id="email-login" placeholder="youremail@example.com" name="email" required autocomplete="email">
+
             <br>
+
+            <!-- label for the password input-->
             <label for="password-login">Enter Password:</label>
-            <input type="password" id="password-login" placeholder="ILoveMovies123" name="password" required autocomplete="current-password">
+
+            <!-- wrapper to group the password input and toggle button-->
+            <div class="password-wrapper">
+
+                <!-- password input -->
+                <input type="password" id="password-login" placeholder="ILoveMovies123" name="password" required autocomplete="current-password">
+
+                <!-- toggle eye icon button-->
+                 <button type="button" id="toggle-password" aria-label="Toggle password visibility">
+
+                    <!-- Open eye icon, initally hidden until password is visible -->
+                    <img src="{{ url_for('static', filename='eye.svg') }}" alt="Show Password" class="eye-icon eye-open hidden">
+                    <!--                                                      three different class: .eye-icon, .eye-open, .hidden-->
+                    <!-- closed eye icon, shown by default while password is hidden -->
+                    <img src="{{ url_for('static', filename='eye-off.svg') }}" alt="Hide Password" class="eye-icon eye-closed">
+                                                                                    <!-- two different classes: .eye-icon, .eye-closed -->
+                                <!-- the eye-off.svg dosent have the hidden class first becasue it appears as default-->
+                </button>
+            </div>
+            
             <br>
+
             <button type="submit">Login</button>
             <p>Don't have an account? <a href="/register">Click Here to Sign Up</a></p>
+
         </form>
     </div>
 </body>

@@ -665,3 +665,52 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 #login-form a:hover {
   text-decoration: underline;
 }
+
+
+
+
+
+
+/*eye icon for showing visible/invisible password*/
+
+/*container that holds the password input and the eye toggle button*/
+.password-wrapper {
+  position: relative; /*position the toggle button inside the container*/
+  width: 100%; /*wrapper full width of its parents*/
+  margin-bottom: 16px;
+}
+
+/* password input inside the wrapper */
+.password-wrapper input {
+  width: 100%; /*input box full width of wrapper*/
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px; /*rounded corners*/
+  box-sizing: border-box; /*include padding and border in the elements total width*/
+}
+
+/* the eye icon */
+#toggle-password {
+  position: absolute; /*position relative to .password-wrapper*/
+  top: 35%; /*vertical position relativce to wrapper*/
+  right: -60px; /* push iconm to right */
+  transform: translateY(-50%); /*center the button vertically*/
+  background: transparent; /*no background*/
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Eye image style */
+.eye-icon {
+  width: 30px;
+  height: 30px;
+  pointer-events: none; /*prevents clicking the icon itself interfering with the button*/
+  user-select: none; /*prevents text selection*/
+}
+
+/*class to hide elements*/
+.hidden {
+  display: none; /*hide the elem */
+}
+
