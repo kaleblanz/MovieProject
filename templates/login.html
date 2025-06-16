@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CinemaPrompt</title>
+    <!--jinja syntax for inserting dynamic content for HTMl templates-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!--url_for() generates a URL to a specific route-->
+
+    <script src="{{url_for('static', filename='js/main.js')}}"></script>
+    <!--url_for()tells flask to look inside static/ folder-->
+    <!--defer ensures JS runs after HTML is loaded-->
+
+    
+    <!-- generate the favicon-->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='cinemaprompt.png') }}">
+    
+     <!-- Import Google Font (Poppins) -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body id="login-body">
+    
+    
+    <div class="login-container">
+
+        <!-- title -->
+        <H1 id="welcome-title-login">Welcome To CinemaPrompt</H1>
+
+        <!-- logo -->
+        <img src="{{ url_for('static', filename='cinemaprompt.png') }}" alt="CinemaPrompt Logo" class="login-logo">
+        
+        <h1 id="login-header">Log In To Your Account</h1>
+
+        <!-- login form for user-->
+        <form id="login-form">
+            <label for="email-login">Enter Email:</label>
+            <input type="email" id="email-login" placeholder="youremail@example.com" name="email" required autocomplete="email">
+            <br>
+            <label for="password-login">Enter Password:</label>
+            <input type="password" id="password-login" placeholder="ILoveMovies123" name="password" required autocomplete="current-password">
+            <br>
+            <button type="submit">Login</button>
+            <p>Don't have an account? <a href="/register">Click Here to Sign Up</a></p>
+        </form>
+    </div>
+</body>
+
+</html>

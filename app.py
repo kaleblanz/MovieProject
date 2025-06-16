@@ -81,6 +81,24 @@ def homePage():
     #datas = currentPopularMovies()['results']
     #return render_template("index.html",datas=datas)
 
+
+@app.route('/login')
+def loginPage():
+    """
+    renders the login page for user to login
+    """
+    return render_template("login.html")
+
+@app.route('/register')
+def registerPage():
+    """
+    render the register page for a user to createe their new account
+    """
+    return render_template('register.html')
+
+
+
+
 #endpoint for js to fetch to get the top trending movies
 #returns first page of current trending movies
 @app.route('/popularMovies')

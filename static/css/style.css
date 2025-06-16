@@ -501,3 +501,167 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   box-shadow: 0 0 10px rgba(255, 255, 0, 0.7);
 }
 
+
+
+
+
+
+/* Import a cool font - add this in your <head> of HTML */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/*welcome title for login: 'Welcome To CinemaPrompt'*/
+#welcome-title-login{
+  font-weight: 700;
+  font-size: 2.8rem;
+  letter-spacing: 2px;
+  color: #7b2cbf; 
+  text-align: center; /*center text horiz*/
+  text-transform: uppercase; /*makes it all letters uppercase*/
+  text-shadow: 2px 2px 8px rgba(123, 44, 191, 0.7);
+  margin-bottom: 25px;  /*space below the title*/
+}
+
+/*our logo above the login forum*/
+.login-logo{
+  width: 120px;
+  height: auto; /*keeps the ascpet ratio*/
+  margin-bottom: 20px;
+}
+
+
+/*styling for the login page background*/
+#login-body{
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  color: #2e2e6a; /* deep purple-blue */
+
+  /* Multi-color, rich purple-blue-pink gradient */
+  background: linear-gradient(270deg, 
+    #6a0dad, 
+    #9c27b0, 
+    #7e3f98, 
+    #5b2e8a, 
+    #3a3a98, 
+    #7b2cbf,
+    #9c27b0,
+    #6a0dad
+  );
+
+  background-size: 1600% 1600%; /* Bigger size for smooth animation */
+  animation: vibrantGradient 15s ease infinite; /* Slow and smooth */
+  min-height: 100vh; /*takes up full height of the browerser (viewport height)*/
+
+  display: flex; /*centering usiong flexbox*/
+  justify-content: center; /*centers content horiz*/
+  align-items: center;   /*centers content horiz*/
+}
+/*animation for the background*/
+@keyframes vibrantGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/*container for everything in login box*/
+.login-container{
+  background-color: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  max-width: 400px;
+  width: 90%;
+  display: flex;
+  flex-direction: column; /*stack children vertically*/
+  align-items: center; /*center content horiz*/
+}
+
+/*login header: 'Log In To Your Account'*/
+#login-header{
+  font-weight: 600;
+  font-size: 1.8rem;
+  color: #5b2e8a;
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: 1.2px;
+  text-shadow: 1px 1px 4px rgba(91, 46, 138, 0.5);
+}
+
+/*style the form*/
+/*makes it so the text area is under the Enter:*/
+#login-form{
+  display: flex;
+  flex-direction: column; /*stack the inputs vertically*/
+}
+
+/*text above input boxes 'enter password' and 'enter email' */
+#login-form label{
+  font-weight: 600;
+  font-size: 1rem;
+  color: #4a3a7e;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  display: block; /*makes the label take full width*/
+}
+
+/*input boxes of login form, email and password box*/
+#login-form input{
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  transition: border 0.3s;
+}
+
+/*color around border when clicked on input boxes*/
+#login-form input:focus{
+  outline: none;
+  border-color: #7d18c5;
+  box-shadow: 0 0 0 2px rgba(106, 13, 173, 0.6);
+}
+
+/*styling the login button*/
+#login-form button{
+  background: rgb(114, 32, 182);
+  color: #fff;
+  font-size: 1rem;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.7s ease; /*hover effects*/
+}
+
+/*hovering over the login button*/
+#login-form button:hover{
+  background: rgb(202, 80, 202);
+}
+
+
+/*text under the form, dont have an account?*/
+#login-form p{
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: #444;
+  text-align: center;
+}
+
+/*link to create an account*/
+#login-form a {
+  color: #6a0dad;
+  text-decoration: none; /*no deafaulted underline for the link*/
+  font-weight: bold;
+  font-style: italic;
+}
+
+/*hovering over link adds the underline*/
+#login-form a:hover {
+  text-decoration: underline;
+}
