@@ -1,3 +1,7 @@
+/* Import a cool font - add this in your <head> of HTML */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+
 header{
     /*horizontal graidnet of 3 colors*/
   background: linear-gradient(135deg, #1f1c2c, #928dab, #3f2b96, #a8c0ff);
@@ -95,6 +99,7 @@ body{
     margin: 0;
     padding: 0;
     background-color: rgb(71, 69, 69);
+    font-family: 'Roboto', sans-serif;
 }
 
 /*the title in  header*/
@@ -506,19 +511,19 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 
 
 
-/* Import a cool font - add this in your <head> of HTML */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
 
 /*welcome title for login: 'Welcome To CinemaPrompt'*/
 #welcome-title-login{
   font-weight: 700;
-  font-size: 2.8rem;
+  font-size: 2.2rem;
   letter-spacing: 2px;
   color: #7b2cbf; 
   text-align: center; /*center text horiz*/
   text-transform: uppercase; /*makes it all letters uppercase*/
   text-shadow: 2px 2px 8px rgba(123, 44, 191, 0.7);
   margin-bottom: 25px;  /*space below the title*/
+  margin-top: .1%;
 }
 
 /*our logo above the login forum*/
@@ -701,6 +706,7 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   padding: 0;
 }
 
+
 /* Eye image style */
 .eye-icon {
   width: 30px;
@@ -714,3 +720,49 @@ has predefined class that we use such as .swiper  and .swiper slide*/
   display: none; /*hide the elem */
 }
 
+
+/*for the 'confirm your password' box*/
+/*container that holds the password input and the eye toggle button*/
+.confirm-password-wrapper {
+  position: relative; /*position the toggle button inside the container*/
+  width: 100%; /*wrapper full width of its parents*/
+  margin-bottom: 16px;
+}
+
+/* password input inside the wrapper */
+.confirm-password-wrapper input {
+  width: 100%; /*input box full width of wrapper*/
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px; /*rounded corners*/
+  box-sizing: border-box; /*include padding and border in the elements total width*/
+}
+
+/* the eye icon */
+#confirm-toggle-password {
+  position: absolute; /*position relative to .password-wrapper*/
+  top: 35%; /*vertical position relativce to wrapper*/
+  right: -60px; /* push iconm to right */
+  transform: translateY(-50%); /*center the button vertically*/
+  background: transparent; /*no background*/
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+
+
+
+/*error message for when 2 passwords in register do not match*/
+/*targets any <input> with the class='error' attached to it*/
+input.error {
+  border-color: red;
+  border-width: 2px;
+}
+
+/*div that shows the error message, hidden when no error*/
+.password-error-message{
+  color: red;
+  font-size: 1.1rem;
+  margin-top: 4px;
+}

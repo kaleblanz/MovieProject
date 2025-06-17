@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")  
-print("DATABASE_URL =", DATABASE_URL)
+#print("DATABASE_URL =", DATABASE_URL)
 
 #create SQLAlchemy engine that manages the connection pool to the PostgreSQL db
 engine = create_engine(DATABASE_URL)

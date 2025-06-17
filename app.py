@@ -13,9 +13,17 @@ from typing import Optional
 import re
 
 #SQLAlchemy will translate our python commands into SQL and PostgreSQL server runs them
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
-from sqlalchemy.orm import sessionmaker, declarative_base
 from db import SessionLocal
+from models import Users
+from datetime import datetime, timezone
+from werkzeug.security import generate_password_hash
+from email_validator import validate_email, EmailNotValidError
+
+#limit repeated requests
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+
 
 
 #request vs requests:
@@ -25,15 +33,12 @@ from db import SessionLocal
 #app object resprents our web app, instance of flask class
 app = Flask(__name__)
 
-
-
-
-
-
-db = SessionLocal()
-
-
-
+#to limit requests
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"] #global limits
+)
 
 GENRES_ALIASES = {
     "sci-fi": "Science Fiction",
@@ -819,6 +824,101 @@ def search_movie(movie):
 
     print(f"WARNING: Using first TMDB result for movie: {movie}")
     return results[0]
+
+
+#create a new session (our connection to the PostgreSQL DB)
+db = SessionLocal()
+
+@app.route('/UserRegistration', methods=['POST'])
+@limiter.limit("5 per minute")
+def handleUserRegistration():
+    print("inisdeeee")
+    #parse incoming JSON data from client side
+    user_data = request.get_json().get('UserData')
+    print('user_datap: ', user_data)
+    #verifies that all keys are in the user_data dict
+    required_fields = ['email','username','password']
+    missing = [field for field in required_fields if field not in user_data]
+    if missing:
+        return jsonify({"error" : f"missing fields: {missing}"}), 400
+    
+    #validates the email is proper form
+    email = user_data['email']
+    try:
+        validate_email(email)
+    except EmailNotValidError as e:
+        return jsonify({"error" : "Email error"}), 400
+    
+    #validates the password is proper length
+    password = user_data['password']
+    if len(password) < 3 or len(password) > 80:
+        return jsonify({"error": "Password must be in range of 3 and 80 characters"}), 400
+    
+
+    username = user_data['username']
+    print(f"email : {email},   username: {username},   password: {password}")
+
+    #use a context manager to create and automatically close the DB session
+    with SessionLocal() as db:
+        #check if email or username is already exists in DB
+        existing_user = db.query(Users).filter(
+            (Users.email == email) | (Users.username == username)
+        ).first()#get the first matching user, or None if no match
+
+        if existing_user:
+            #if an existing user with the same email is found
+            if existing_user.email == email:
+                print("erorr:  Email already in use 400")
+                return jsonify({"error" : "Email error"}), 400
+            #if an existing user with the same username is found
+            else:
+                print("erorr:  username already in use 400")
+                return jsonify({"error" : "Username already in use"}), 400
+        
+        #we can continue knowing we have a unique username and email
+
+        #create a new User Obj
+        hash_password = generate_password_hash(password)
+        new_user = Users(
+            username = username,
+            email = email,
+            password_hashed = hash_password,
+            date_created = datetime.now(timezone.utc),
+            profile_picture = "",
+            last_login = datetime.now(timezone.utc),
+            active_status = True
+        )
+
+        try:
+            #add 'new_user' to session
+            db.add(new_user) 
+
+            #commit the transaction (saves to DB)
+            db.commit()
+
+            print(f"User successfully added with ID: {new_user.id!r}")
+
+        except Exception as e:
+            print("error during DB operation", e)
+            db.rollback() #un-does all changes i've made in the current DB since the last commit()
+            return jsonify({"eroor": "Internal Server Error"}),500
+        
+        readUserTable()
+        return jsonify({
+            "success": True,
+            "user": {
+                "id": new_user.id,
+                "username": new_user.username,
+                "email": new_user.email
+            }
+        }), 201
+
+
+def readUserTable():
+    with SessionLocal() as db:
+        users = db.query(Users).all()
+        for user in users:
+            print(user)
 
 #ensures app is not restart manually if any changes are made in code
 if __name__ == '__main__':

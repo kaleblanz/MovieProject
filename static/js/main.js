@@ -3,9 +3,7 @@
  * @returns void
  */
 function fetchPopularCarouselMoviesHomePage(){
-  //DOMContentLoaded makes sure our JS code only runs after the HTML has been fully loaded
-  //what could go wrong is elemid="movie-carousel" may not exist yet
-  document.addEventListener("DOMContentLoaded", () => {
+  
     //fetch the popualr movies from the flask endpoint
     fetch('/popularMovies')
       .then(response => response.json()) //parse the http into json
@@ -45,12 +43,20 @@ function fetchPopularCarouselMoviesHomePage(){
           grabCursor: true, //change cursor to grab icon on hover
         });
       })
-
       //log error if fetch fails
       .catch(err => console.error("Error loading popular movies for home screen:", err));
-  });
+  ;
 }
-fetchPopularCarouselMoviesHomePage();
+
+  //DOMContentLoaded makes sure our JS code only runs after the HTML has been fully loaded
+  //what could go wrong is elemid="movie-carousel" may not exist yet
+  document.addEventListener('DOMContentLoaded', () => {
+  const popMovies = document.getElementById('titlePopMovies');
+  if (popMovies) { //only true if current HTML file has the id of 'titlePopMovies'
+    fetchPopularCarouselMoviesHomePage();
+  }
+});
+
 
 
 
@@ -177,7 +183,10 @@ document.addEventListener("DOMContentLoaded", () => {
   //once DOM is loaded, attach the even listener to the form
 
   //you pass the function with no args bc then the browser calls when the form is submitted and passing event obj automatically
-  document.querySelector("form").addEventListener("submit",fetchRecommendationForUserMoviePrompt)
+  const check_if_on_right_page = document.getElementById('PromptBox')
+  if(check_if_on_right_page){//runs this function only if the id=PromptBox is on the HTML
+    document.querySelector("form").addEventListener("submit",fetchRecommendationForUserMoviePrompt)
+  }
   //attach the form submission evebt to the custom handler function
 })
 
@@ -280,13 +289,86 @@ function enablePasswordToggle(passwordInputId, toggleButtonId) {
     }
   });
 }
-
+//for the 'enter password'
 // Wait for the page to fully load the Document Object Model (DOM)
 document.addEventListener('DOMContentLoaded', () => {
   // Call the function and pass the IDs of the password input and toggle button
   enablePasswordToggle('password-login', 'toggle-password');
 });
 
+//for the 'Confirm Password'
+// Wait for the page to fully load the Document Object Model (DOM)
+document.addEventListener('DOMContentLoaded', () => {
+  // Call the function and pass the IDs of the password input and toggle button
+  enablePasswordToggle('confirm-password-login', 'confirm-toggle-password');
+});
+
+
+
+
+
+
+
+
+
+function setUpRegisterFormHandler(){
+  const confirmPasswordInput = document.getElementById('confirm-password-login');
+  if (confirmPasswordInput){//only go further if the DOM has id of 'confirm-password-login'
+    const registerForm = document.getElementById('login-form');
+    registerForm.addEventListener('submit', (event) => {
+      event.preventDefault(); //this prevents the page from reloading
+
+      //get user's email from input field with id='email-login'
+      const email = document.getElementById('email-login');
+      console.log('this is the email: ' + email.value);
+
+      const username = document.getElementById('username')
+      console.log("the username: " + username.value);
+
+      //get user's passowrd from input field with id='password-login'
+      const password = document.getElementById('password-login');
+      console.log("this is the password: " + password.value)
+
+      //get user's confirmed password from input field with id='confirm-password-login'
+      const confirm_password = document.getElementById('confirm-password-login');
+      console.log("this is the confirmed password: " + confirm_password.value)
+
+      
+
+      //password error div
+      const error_box = document.getElementById('password-error');
+
+      if(password.value === confirm_password.value){//true when the 2 passwords are the same
+        //continue
+        console.log("passwords are the same")
+        password.classList.remove('error');
+        confirm_password.classList.remove('error');
+        error_box.textContent = '';
+        error_box.style.display = 'none';
+
+        //fetch the endpoint of '/UserRegistration' on the backend and send this 
+        fetch('/UserRegistration',{
+          method: 'POST',
+          headers:{'Content-Type' : 'application/json'},
+          body:JSON.stringify({UserData : {"email" : email.value,"password" : password.value, "username": username.value}}) //data being sent
+        })
+
+
+
+      }else{//the 2 passwords are different
+        //tell user there is a problem
+        console.log("passwords are NOT the same")
+        password.classList.add('error');
+        confirm_password.classList.add('error');
+        error_box.textContent = 'Your passwords do NOT match.';
+        error_box.style.display = 'block';
+      }
+    });
+  } 
+} 
+//wait for the Document Object Model to be fully loaded
+//once DOM is loaded, attach the even listener to the form
+document.addEventListener("DOMContentLoaded", setUpRegisterFormHandler);
 
 
 

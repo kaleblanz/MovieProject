@@ -31,18 +31,76 @@
         <!-- logo -->
         <img src="{{ url_for('static', filename='cinemaprompt.png') }}" alt="CinemaPrompt Logo" class="login-logo">
         
-        <h1 id="login-header">Sign Up To Create An Account</h1>
+        <h1 id="login-header">Sign Up To Create Your Account</h1>
 
         <!-- login form for user-->
         <form id="login-form">
+
+            <!-- email input box -->
             <label for="email-login">Enter Email:</label>
-            <input type="email" id="email-login" placeholder="youremail@example.com" name="email" required autocomplete="email">
+            <input type="email" id="email-login" placeholder="your_email@example.com" name="email" required autocomplete="email">
+
             <br>
+
+            <!-- username input box -->
+            <label for="username">Enter Username:</label>
+            <input type="text" id="username" placeholder="ilovemycat4" name="username" required>
+
+            <br>
+
+
+            <!-- label for the password input-->
             <label for="password-login">Enter Password:</label>
-            <input type="password" id="password-login" placeholder="ILoveMovies123" name="password" required autocomplete="current-password">
+
+            <!-- wrapper to group the password input and toggle button-->
+            <div class="password-wrapper">
+
+                <!-- password input -->
+                <input type="password" id="password-login" placeholder="ILoveMovies123" name="password" required autocomplete="current-password">
+
+                <!-- toggle eye icon button-->
+                 <button type="button" id="toggle-password" aria-label="Toggle password visibility">
+
+                    <!-- Open eye icon, initally hidden until password is visible -->
+                    <img src="{{ url_for('static', filename='eye.svg') }}" alt="Show Password" class="eye-icon eye-open hidden">
+                    <!--                                                      three different class: .eye-icon, .eye-open, .hidden-->
+                    <!-- closed eye icon, shown by default while password is hidden -->
+                    <img src="{{ url_for('static', filename='eye-off.svg') }}" alt="Hide Password" class="eye-icon eye-closed">
+                                                                                    <!-- two different classes: .eye-icon, .eye-closed -->
+                                <!-- the eye-off.svg dosent have the hidden class first becasue it appears as default-->
+                </button>
+            </div>
+
+            <!-- error message if 2 passwords dont match-->
+            <div id="password-error" class="password-error-message" style="display: none;"></div>
+
+            <!-- label for the confirmed password input-->
+            <label for="confirm-password-login">Confirm Your Password:</label>
+
+            <!-- wrapper to group the confirm password input and toggle button-->
+            <div class="confirm-password-wrapper">
+
+                <!-- confirm password input -->
+                <input type="password" id="confirm-password-login" placeholder="ILoveMovies123" name="password" required autocomplete="current-password">
+
+                <!-- confirm toggle eye icon button-->
+                 <button type="button" id="confirm-toggle-password" aria-label="Toggle password visibility">
+
+                    <!-- Open eye icon, initally hidden until password is visible -->
+                    <img src="{{ url_for('static', filename='eye.svg') }}" alt="Show Password" class="eye-icon eye-open hidden">
+                    <!--                                                      three different class: .eye-icon, .eye-open, .hidden-->
+                    <!-- closed eye icon, shown by default while password is hidden -->
+                    <img src="{{ url_for('static', filename='eye-off.svg') }}" alt="Hide Password" class="eye-icon eye-closed">
+                                                                                    <!-- two different classes: .eye-icon, .eye-closed -->
+                                <!-- the eye-off.svg dosent have the hidden class first becasue it appears as default-->
+                </button>
+            </div>
+            
             <br>
+
             <button type="submit">Sign Up</button>
-            <p>Already Have An Account?<a href="/login">Click Here to Sign In</a></p>
+            <p>Already Have An Account? <a href="/login">Click Here To Sign In</a></p>
+
         </form>
     </div>
 </body>
