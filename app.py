@@ -933,14 +933,20 @@ def handleUserRegistration():
                           sender=app.config['MAIL_USERNAME'] ,
                           recipients=[email])
             msg.body = f"Welcome {username}! Click the link to verify your email: {confirmURL}"
+            print("email sending")
             mail.send(message=msg)
+            print("enail send")
 
+            return render_template("notice_email.html",email=email),201
+        
         except Exception as e:
             print("error during DB operation", e)
             db.rollback() #un-does all changes i've made in the current DB since the last commit()
-            return jsonify({"eroor": "Internal Server Error"}),500
+            return jsonify({"error": "Internal Server Error"}),500
         
         #readUserTable()
+        
+        '''
         return jsonify({
             "success": True,
             "user": {
@@ -949,6 +955,7 @@ def handleUserRegistration():
                 "email": new_user.email
             }
         }), 201
+        '''
     
 
 @app.route('/verify-email')
@@ -970,7 +977,9 @@ def verifyEmail():
         
         user.is_verified = True
         db.commit()
-        return f"Email {email} verified successfully!", 200
+        print(f"the user: {user.username} has been added and rendering the template of verify_success.html")
+        return render_template("verify_sucess.html", email=email), 200
+        
 
 
 def readUserTable():
