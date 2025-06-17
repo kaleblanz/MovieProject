@@ -23,6 +23,9 @@ from email_validator import validate_email, EmailNotValidError
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+#for sending mail verification
+from flask_mail import Mail, Message
+from email_verification import confirmToken, generateConfirmationToken
 
 
 
@@ -32,6 +35,27 @@ from flask_limiter.util import get_remote_address
 
 #app object resprents our web app, instance of flask class
 app = Flask(__name__)
+
+
+load_dotenv()
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com' #the SMTP server
+app.config['MAIL_PORT'] = 587 #port for TLS encryption
+app.config['MAIL_USE_TLS'] = True #enable TLS (Transport Layer Security)
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME') #my email address
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD') #my password for said email
+app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
+print("the app,configs:")
+print("app.config['MAIL_USERNAME'] : ", app.config['MAIL_USERNAME'])
+print("app.config['MAIL_PASSWORD'] : ", app.config['MAIL_PASSWORD'])
+print("app.config['MAIL_DEFAULT_SENDER'] : ", app.config['MAIL_DEFAULT_SENDER'])
+
+    
+    #return None
+
+#init Flask-Mail obj with app
+mail = Mail(app)
+
 
 #to limit requests
 limiter = Limiter(
@@ -832,6 +856,7 @@ db = SessionLocal()
 @app.route('/UserRegistration', methods=['POST'])
 @limiter.limit("5 per minute")
 def handleUserRegistration():
+    #pp()
     print("inisdeeee")
     #parse incoming JSON data from client side
     user_data = request.get_json().get('UserData')
@@ -898,12 +923,24 @@ def handleUserRegistration():
 
             print(f"User successfully added with ID: {new_user.id!r}")
 
+
+            #email confirmation token and email
+            token = generateConfirmationToken(email=email)
+            confirmURL = os.getenv("BASE_URL","http://localhost:5000")
+            confirmURL += f"/verify-email?token={token}"
+            
+            msg = Message("Confirm Your Email to continue", 
+                          sender=app.config['MAIL_USERNAME'] ,
+                          recipients=[email])
+            msg.body = f"Welcome {username}! Click the link to verify your email: {confirmURL}"
+            mail.send(message=msg)
+
         except Exception as e:
             print("error during DB operation", e)
             db.rollback() #un-does all changes i've made in the current DB since the last commit()
             return jsonify({"eroor": "Internal Server Error"}),500
         
-        readUserTable()
+        #readUserTable()
         return jsonify({
             "success": True,
             "user": {
@@ -912,6 +949,28 @@ def handleUserRegistration():
                 "email": new_user.email
             }
         }), 201
+    
+
+@app.route('/verify-email')
+def verifyEmail():
+    token =  request.args.get('token')
+    email = confirmToken(token=token)
+
+    if not email:
+        return "Verification link is invalid or expired.", 400
+    
+    with SessionLocal() as db:
+        user = db.query(Users).filter(Users.email == email).first()
+
+        if not user:
+            return "User not found", 404
+        
+        if user.is_verified:
+            return "Account is already verified!", 200
+        
+        user.is_verified = True
+        db.commit()
+        return f"Email {email} verified successfully!", 200
 
 
 def readUserTable():

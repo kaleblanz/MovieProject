@@ -24,6 +24,7 @@ class Users(Base):
     profile_picture = Column(String, nullable=False)
     last_login = Column(DateTime, nullable=False)
     active_status = Column(Boolean, nullable=False)
+    is_verified = Column(Boolean, default=False)
 
     #__repr__() is the official string representation of an object
     #like the toString() method in Java
