@@ -311,64 +311,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-function setUpRegisterFormHandler(){
+async function setUpRegisterFormHandler() {
   const confirmPasswordInput = document.getElementById('confirm-password-login');
-  if (confirmPasswordInput){//only go further if the DOM has id of 'confirm-password-login'
+
+  if (confirmPasswordInput) {
     const registerForm = document.getElementById('login-form');
-    registerForm.addEventListener('submit', (event) => {
-      event.preventDefault(); //this prevents the page from reloading
 
-      //get user's email from input field with id='email-login'
+    registerForm.addEventListener('submit', async function (event) {
+      event.preventDefault(); // prevent page reload
+
       const email = document.getElementById('email-login');
-      console.log('this is the email: ' + email.value);
-
-      const username = document.getElementById('username')
-      console.log("the username: " + username.value);
-
-      //get user's passowrd from input field with id='password-login'
+      const username = document.getElementById('username');
       const password = document.getElementById('password-login');
-      console.log("this is the password: " + password.value)
-
-      //get user's confirmed password from input field with id='confirm-password-login'
       const confirm_password = document.getElementById('confirm-password-login');
-      console.log("this is the confirmed password: " + confirm_password.value)
-
-      
-
-      //password error div
       const error_box = document.getElementById('password-error');
 
-      if(password.value === confirm_password.value){//true when the 2 passwords are the same
-        //continue
-        console.log("passwords are the same")
+      if (password.value === confirm_password.value) {
+        // Clear previous errors
         password.classList.remove('error');
         confirm_password.classList.remove('error');
         error_box.textContent = '';
         error_box.style.display = 'none';
 
-        //fetch the endpoint of '/UserRegistration' on the backend and send this 
-        fetch('/UserRegistration',{
+        const userData = {
+          UserData: {
+            email: email.value,
+            username: username.value,
+            password: password.value
+          }
+        };
+
+        const response = await fetch('/UserRegistration', {
           method: 'POST',
-          headers:{'Content-Type' : 'application/json'},
-          body:JSON.stringify({UserData : {"email" : email.value,"password" : password.value, "username": username.value}}) //data being sent
-        })
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(userData)
+        });
 
 
+        console.log("outside fetche resposne");
+        if (response.ok) {
+          const html = await response.text();
+          console.log("inside fetche resposne");
+          console.log(html);
+          document.body.innerHTML = html; // ✅ Replace entire page body
+        } else {
+          const error = await response.json();
+          alert("Error: " + (error.error || "Unknown error"));
+        }
 
-      }else{//the 2 passwords are different
-        //tell user there is a problem
-        console.log("passwords are NOT the same")
+
+      } else {
         password.classList.add('error');
         confirm_password.classList.add('error');
         error_box.textContent = 'Your passwords do NOT match.';
         error_box.style.display = 'block';
       }
     });
-  } 
-} 
-//wait for the Document Object Model to be fully loaded
-//once DOM is loaded, attach the even listener to the form
+  }
+}
+
 document.addEventListener("DOMContentLoaded", setUpRegisterFormHandler);
+
 
 
 

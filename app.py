@@ -869,6 +869,8 @@ def handleUserRegistration():
     
     #validates the email is proper form
     email = user_data['email']
+    print("error with emails userdata: ", user_data)
+    print("error with email: ", email)
     try:
         validate_email(email)
     except EmailNotValidError as e:
@@ -926,6 +928,7 @@ def handleUserRegistration():
 
             #email confirmation token and email
             token = generateConfirmationToken(email=email)
+            #change BASE URL EVENTUALLY WHEN CHANGING HOST
             confirmURL = os.getenv("BASE_URL","http://localhost:5000")
             confirmURL += f"/verify-email?token={token}"
             
@@ -937,7 +940,9 @@ def handleUserRegistration():
             mail.send(message=msg)
             print("enail send")
 
-            return render_template("notice_email.html",email=email),201
+            #print(str(render_template("notice_email.html", email=email)))
+            return render_template("notice_email.html", email=email), 201
+
         
         except Exception as e:
             print("error during DB operation", e)
