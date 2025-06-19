@@ -856,11 +856,10 @@ db = SessionLocal()
 @app.route('/UserRegistration', methods=['POST'])
 @limiter.limit("5 per minute")
 def handleUserRegistration():
-    #pp()
-    print("inisdeeee")
+    print("inisde handleUserRegistration()")
     #parse incoming JSON data from client side
     user_data = request.get_json().get('UserData')
-    print('user_datap: ', user_data)
+    print('user_data from frontend: ', user_data)
     #verifies that all keys are in the user_data dict
     required_fields = ['email','username','password']
     missing = [field for field in required_fields if field not in user_data]
@@ -869,8 +868,7 @@ def handleUserRegistration():
     
     #validates the email is proper form
     email = user_data['email']
-    print("error with emails userdata: ", user_data)
-    print("error with email: ", email)
+    
     try:
         validate_email(email)
     except EmailNotValidError as e:
@@ -878,6 +876,7 @@ def handleUserRegistration():
     
     #validates the password is proper length
     password = user_data['password']
+    print("lenght of users password: ", len(password))
     if len(password) < 3 or len(password) > 80:
         return jsonify({"error": "Password must be in range of 3 and 80 characters"}), 400
     
@@ -975,10 +974,10 @@ def verifyEmail():
         user = db.query(Users).filter(Users.email == email).first()
 
         if not user:
-            return "User not found", 404
+            return render_template("verify_error.html", email=email), 200
         
         if user.is_verified:
-            return "Account is already verified!", 200
+            return render_template("already_verified.html", email=email), 200
         
         user.is_verified = True
         db.commit()

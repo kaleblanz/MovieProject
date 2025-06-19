@@ -349,16 +349,30 @@ async function setUpRegisterFormHandler() {
           body: JSON.stringify(userData)
         });
 
-
-        console.log("outside fetche resposne");
-        if (response.ok) {
-          const html = await response.text();
-          console.log("inside fetche resposne");
-          console.log(html);
-          document.body.innerHTML = html; // ✅ Replace entire page body
-        } else {
+        console.log(response.status)
+        
+       
+        if (response.ok) {//response.ok is true only when the response status is in the range 200–299
+            const html = await response.text();
+            //console.log("inside fetche resposne");
+            console.log("html code: " + html);
+            document.body.innerHTML = html; // replace entire page body
+          }
+         else {
           const error = await response.json();
-          alert("Error: " + (error.error || "Unknown error"));
+          console.log("error_msg: ", error);
+          console.log("error_msg inside error obj using error key: ", error.error);
+          console.log("Full error stringified:", JSON.stringify(error, null, 2));
+          const error_msg = error.error.toLowerCase()
+          if(error_msg.includes("password")){//very raw way of letting user know their password is too short
+            console.log("error message is for password too short")
+            password.classList.add('error');
+            confirm_password.classList.add('error');
+            error_box.textContent = 'Your Password is too short.';
+            error_box.style.display = 'block';
+
+          }
+          //alert("Error: " + (error.error || "Unknown error"));
         }
 
 
