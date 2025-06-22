@@ -7,8 +7,11 @@
 </head>
 <body>
   <div class="status-card">
-    <h2 class="status-title" style="color: #ff4c4c;">❌ Verification Error</h2>
-    <p class="status-message">{{ message }}</p>
+    <h2 class="status-title" style="color: #ff4c4c;">❌ Verification Is Invalid</h2>
+    <p class="status-message">
+      You Took To Long To Verify Your Account
+      <span class="status-highlight">{{ email }}</span>
+    </p>
     <a href="/register" class="custom-button" style="background-color: #6c757d; color: white;">
       Go Sign Up Again
     </a>

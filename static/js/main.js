@@ -310,22 +310,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
+/**
+ * event handling for User Registration
+ * - confirms the password and confirm password arte a match before sending to server
+ * - if passwords match, use data is sent to server by POST request
+ * - if response is succesful, replaces the page with a response HTML that tells user an email has been sent
+ * - if error occurs, it displays the the correct error message
+ */
 async function setUpRegisterFormHandler() {
+  //get the 'confirm password' input from user data
   const confirmPasswordInput = document.getElementById('confirm-password-login');
 
+  //only continue if the id 'confirm password' exists
   if (confirmPasswordInput) {
+    //get the <form> tag
     const registerForm = document.getElementById('login-form');
 
+    //listen for form submission
     registerForm.addEventListener('submit', async function (event) {
       event.preventDefault(); // prevent page reload
 
+      //retrieve input values from the forms fields
       const email = document.getElementById('email-login');
       const username = document.getElementById('username');
       const password = document.getElementById('password-login');
       const confirm_password = document.getElementById('confirm-password-login');
       const error_box = document.getElementById('password-error');
 
+      //checking if the password and confirm password is the same
       if (password.value === confirm_password.value) {
         // Clear previous errors
         password.classList.remove('error');
@@ -333,6 +345,7 @@ async function setUpRegisterFormHandler() {
         error_box.textContent = '';
         error_box.style.display = 'none';
 
+        //compact the user data into 1 dictionary
         const userData = {
           UserData: {
             email: email.value,
@@ -341,6 +354,7 @@ async function setUpRegisterFormHandler() {
           }
         };
 
+        //send the User data via a POST request to backend server
         const response = await fetch('/UserRegistration', {
           method: 'POST',
           headers: {
@@ -356,27 +370,77 @@ async function setUpRegisterFormHandler() {
             const html = await response.text();
             //console.log("inside fetche resposne");
             console.log("html code: " + html);
-            document.body.innerHTML = html; // replace entire page body
+            document.body.innerHTML = html; // replace entire page body with returned HTML
           }
          else {
+          //there was an error 
           const error = await response.json();
           console.log("error_msg: ", error);
           console.log("error_msg inside error obj using error key: ", error.error);
           console.log("Full error stringified:", JSON.stringify(error, null, 2));
-          const error_msg = error.error.toLowerCase()
-          if(error_msg.includes("password")){//very raw way of letting user know their password is too short
-            console.log("error message is for password too short")
+          
+          //what was returned from the backend
+          const error_msg = error.error
+
+          //if the error is the password being too short
+          if(error_msg.includes("Password must be in range of 3 and 80 characters")){
             password.classList.add('error');
             confirm_password.classList.add('error');
-            error_box.textContent = 'Your Password is too short.';
+            error_box.textContent = 'Your Password is not in 3-80 character range.';
             error_box.style.display = 'block';
-
           }
-          //alert("Error: " + (error.error || "Unknown error"));
+          //the email and username are both taken already
+          if(error_msg.includes("email and username are both in use")){
+            email.classList.add('error');
+            username.classList.add('error');
+            error_box.textContent = "Your Email and Username are already in Use!";
+            error_box.style.display = 'block';
+          }
+          //the username is already taken
+          if(error_msg.includes("Username already in use")){
+            username.classList.add('error');
+            error_box.textContent = "Your Username is already in Use!";
+            error_box.style.display = 'block';
+          }
+          //the email is already taken
+          if(error_msg.includes("email already in use")){
+            email.classList.add('error');
+            error_box.textContent = "Your Email is already in Use!";
+            error_box.style.display = 'block';
+          }
+           //they're missing fields in the submittion
+          if(error_msg.includes("missing fields")){
+            email.classList.add('error');
+            error_box.textContent = "You're missing either your Email, Username, or Password!";
+            error_box.style.display = 'block';
+          }
+           //the email is invalid by its form
+          if(error_msg.includes("Email error from validate_email(email)")){
+            email.classList.add('error');
+            error_box.textContent = "Your Email is not a valid email!";
+            error_box.style.display = 'block';
+          }
+          //verification email couldn't send
+          if(error_msg.includes("Verification email could not be sent, try again")){
+            email.classList.add('error');
+            error_box.textContent = "Your Verification email couldn't send, try again, or try a new email!";
+            error_box.style.display = 'block';
+          }
+          //internal error
+          if(error_msg.includes("Internal Server Error")){
+            email.classList.add('error');
+            error_box.textContent = "Please try another time, sorry!";
+            error_box.style.display = 'block';
+          }
+          /** 
+          else{//error message for when we don't have an if for it
+            alert("Error: " + (error.error || "Unknown error"));
+          }*/
         }
 
 
       } else {
+        //if the passwords don't match, show error
         password.classList.add('error');
         confirm_password.classList.add('error');
         error_box.textContent = 'Your passwords do NOT match.';
@@ -385,7 +449,7 @@ async function setUpRegisterFormHandler() {
     });
   }
 }
-
+//run the function after the entire HTML page has been loaded
 document.addEventListener("DOMContentLoaded", setUpRegisterFormHandler);
 
 
@@ -394,3 +458,39 @@ document.addEventListener("DOMContentLoaded", setUpRegisterFormHandler);
 
 
 
+async function UserLoginHandler() {
+  //make sure its the login page
+  const verify_its_login_page = document.getElementById('LOGIN-PAGE');
+
+  //we are on the login page when true
+  if (verify_its_login_page){
+    //the form on the login page
+    const login_form = document.getElementById('login-form');
+
+    login_form.addEventListener('submit', async function (event) {
+      event.preventDefault(); //prevent from page to reload
+
+      //retrive the email
+      const email = document.getElementById('email-login').value;
+      //retrieve the password
+      const password = document.getElementById('password-login').value;
+
+      const UserData = {"UserData" : {"email": email, "password" : password}};
+      
+      //sent the userData via a POST request to backend server
+      const response = await fetch('/UserLogin', {
+        method: 'POST',
+        headers : {"Content-Type" : "application/json"},
+        body: JSON.stringify(UserData)
+      });
+
+      console.log(response.status);
+
+
+
+    })
+
+  }
+}
+//run the UserLoginHandler() when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", UserLoginHandler);

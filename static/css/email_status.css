@@ -1,0 +1,59 @@
+/* this css is for the styling of the registration html pages
+already_verified, notice_email, verification_link_invalid_or_expired, verify_error, verify_success */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+}
+
+.status-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.status-title {
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+  color: #00ff99;
+}
+
+.status-message {
+  font-size: 1.2rem;
+  font-weight: bold;
+  line-height: 1.5;
+  margin-bottom: 30px;
+}
+
+.status-highlight {
+  font-weight: bold;
+  color: #ffe600;
+}
+
+.custom-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #ffffff;
+  color: #2575fc;
+  text-decoration: none;
+  font-size: 1.3rem;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.custom-button:hover {
+  background-color: #eeeeee;
+}

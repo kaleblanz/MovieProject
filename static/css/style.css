@@ -99,7 +99,6 @@ body{
     margin: 0;
     padding: 0;
     background-color: rgb(71, 69, 69);
-    font-family: 'Roboto', sans-serif;
 }
 
 /*the title in  header*/
@@ -764,5 +763,6 @@ input.error {
 .password-error-message{
   color: red;
   font-size: 1.1rem;
-  margin-top: 4px;
+  margin-top: 1px;
+  width: 350px;
 }

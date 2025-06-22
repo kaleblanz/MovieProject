@@ -4,59 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Verify Your Email</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
 
-    .card {
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 40px;
-      max-width: 500px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    }
-
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 15px;
-    }
-
-    p {
-      font-size: 1.1rem;
-      line-height: 1.5;
-    }
-
-    .highlight {
-      font-weight: bold;
-      color: #ffe600;
-    }
-  </style>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/email_status.css') }}">
 </head>
 
-
 <body>
-  
-    <div class="card">
-      <h1>🎉 Registration Successful!</h1>
-      <p>
-        We've sent a verification link to your email address: 
-        <span class="highlight">{{ email }}</span>
-      </p>
-      <p>
-        Please check your inbox (and spam folder) to verify your account before logging in.
-      </p>
-    </div>
-  
+  <div class="status-card">
+    <h2 class="status-title">🎉 Registration Successful!</h2>
+    <p class="status-message">
+      We've sent a verification link to your email address:
+      <span class="status-highlight">{{ email }}</span>
+    </p>
+    <p class="status-message">
+      Please check your inbox (and spam folder) to verify your account before logging in.
+    </p>
+    <a href="/login" class="custom-button">Login Once Your Email Is Verified</a>
+  </div>
 </body>
 </html>

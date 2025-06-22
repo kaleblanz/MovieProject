@@ -45,10 +45,10 @@ app.config['MAIL_USE_TLS'] = True #enable TLS (Transport Layer Security)
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME') #my email address
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD') #my password for said email
 app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
-print("the app,configs:")
-print("app.config['MAIL_USERNAME'] : ", app.config['MAIL_USERNAME'])
-print("app.config['MAIL_PASSWORD'] : ", app.config['MAIL_PASSWORD'])
-print("app.config['MAIL_DEFAULT_SENDER'] : ", app.config['MAIL_DEFAULT_SENDER'])
+#print("the app,configs:")
+#print("app.config['MAIL_USERNAME'] : ", app.config['MAIL_USERNAME'])
+#print("app.config['MAIL_PASSWORD'] : ", app.config['MAIL_PASSWORD'])
+#print("app.config['MAIL_DEFAULT_SENDER'] : ", app.config['MAIL_DEFAULT_SENDER'])
 
     
     #return None
@@ -856,10 +856,24 @@ db = SessionLocal()
 @app.route('/UserRegistration', methods=['POST'])
 @limiter.limit("5 per minute")
 def handleUserRegistration():
-    print("inisde handleUserRegistration()")
-    #parse incoming JSON data from client side
+    """
+    this route handles user registration from a POST request
+    - recieves user data
+    - validates the email format and password length
+    - checks DB to make sure email and username are unique
+    - hashes password and stores this new user in the DB
+    - sends a confirmation email with a verification link
+    @returns: HTML template if registation successful, error msg otherwise
+    """
+    #print("inisde handleUserRegistration()")
+
+    #get JSON data from request body from client side
+    data = request.get_json()
+    if not data or 'UserData' not in data:
+        return jsonify({"error" : "Invalid input"}), 400
     user_data = request.get_json().get('UserData')
     print('user_data from frontend: ', user_data)
+
     #verifies that all keys are in the user_data dict
     required_fields = ['email','username','password']
     missing = [field for field in required_fields if field not in user_data]
@@ -868,11 +882,10 @@ def handleUserRegistration():
     
     #validates the email is proper form
     email = user_data['email']
-    
     try:
         validate_email(email)
     except EmailNotValidError as e:
-        return jsonify({"error" : "Email error"}), 400
+        return jsonify({"error" : "Email error from validate_email(email)"}), 400
     
     #validates the password is proper length
     password = user_data['password']
@@ -880,7 +893,7 @@ def handleUserRegistration():
     if len(password) < 3 or len(password) > 80:
         return jsonify({"error": "Password must be in range of 3 and 80 characters"}), 400
     
-
+    #retrieve username
     username = user_data['username']
     print(f"email : {email},   username: {username},   password: {password}")
 
@@ -892,29 +905,34 @@ def handleUserRegistration():
         ).first()#get the first matching user, or None if no match
 
         if existing_user:
-            #if an existing user with the same email is found
-            if existing_user.email == email:
-                print("erorr:  Email already in use 400")
-                return jsonify({"error" : "Email error"}), 400
+            #if an existing user with the same email and username is found
+            if (existing_user.email == email) and (existing_user.username == username):
+                print("erorr:  Email and password already in use ")
+                return jsonify({"error" : "email and username are both in use"}), 400
             #if an existing user with the same username is found
-            else:
-                print("erorr:  username already in use 400")
+            elif existing_user.username == username:
+                print("erorr:  username already in use ")
                 return jsonify({"error" : "Username already in use"}), 400
+            else:#email is in use
+                print("erorr:  email already in use ")
+                return jsonify({"error" : "email already in use"}), 400
+
         
         #we can continue knowing we have a unique username and email
 
         #create a new User Obj
-        hash_password = generate_password_hash(password)
+        hash_password = generate_password_hash(password) #hash the password
         new_user = Users(
             username = username,
             email = email,
             password_hashed = hash_password,
             date_created = datetime.now(timezone.utc),
-            profile_picture = "",
+            profile_picture = "", #optional profile picture (maybe add a default one for now)
             last_login = datetime.now(timezone.utc),
             active_status = True
         )
 
+        #add user to the session and commit to the DB
         try:
             #add 'new_user' to session
             db.add(new_user) 
@@ -931,60 +949,101 @@ def handleUserRegistration():
             confirmURL = os.getenv("BASE_URL","http://localhost:5000")
             confirmURL += f"/verify-email?token={token}"
             
-            msg = Message("Confirm Your Email to continue", 
-                          sender=app.config['MAIL_USERNAME'] ,
-                          recipients=[email])
+            #add details to the msg
+            msg = Message("Confirm Your Email to continue", #subject of the email
+                          sender=app.config['MAIL_USERNAME'] , #email address we're sending from
+                          recipients=[email]) #recipients of this email
+            #body of the email
             msg.body = f"Welcome {username}! Click the link to verify your email: {confirmURL}"
             print("email sending")
-            mail.send(message=msg)
+            #email being sent to all recipients
+            try:
+                mail.send(message=msg)
+            except Exception as e:
+                print("failed to send email, error: ",e)
+                return jsonify({"error" : "Verification email could not be sent, try again"}), 500
             print("enail send")
 
-            #print(str(render_template("notice_email.html", email=email)))
+            #render HTML that tells user to look in their email to verify
             return render_template("notice_email.html", email=email), 201
 
-        
+        #catches any unexpected error
         except Exception as e:
             print("error during DB operation", e)
-            db.rollback() #un-does all changes i've made in the current DB since the last commit()
+            db.rollback() #Undo any database changes made during this session
+            #dont return the real error for securityr reasons
             return jsonify({"error": "Internal Server Error"}),500
         
-        #readUserTable()
-        
-        '''
-        return jsonify({
-            "success": True,
-            "user": {
-                "id": new_user.id,
-                "username": new_user.username,
-                "email": new_user.email
-            }
-        }), 201
-        '''
     
 
 @app.route('/verify-email')
 def verifyEmail():
+    """
+    * this route handles email verification link thatr was sent to the user
+    * when user clicks the link in their email inbox, the url contains a 'token'
+
+    funtion details:
+    - extracts and verifies the token to get the user's email
+    - checks if the email is valid or if is expired
+    - finds the user in the DB
+    - if the email is valid and not already verified, sets their account to verified and can access whatever they want on the web app
+    - shows the appropiate html page depending on when and how many times they click the confirmation link
+    """
+    #get the token from the URL query string (ex: ?token=Jt1YQahw....)
+    # - request is a special object that gives access to data sent by the client
+    # - request.args is a dictionary like obj caleld a MultiDict
+    # - it holds query paramters, tehse are k-b pairs in a URL that come after the ?
+    # - ex: http://localhost:5000/verify-email?token=H3LA31 , request.args would contain {'token':'H3LA31'}
+    # - request.args.get tries to fetch the token value associated with the token key
+    # - since we are using .get(), if 'token' is not a keyt, we will return None instead of crashing with a KeyError
     token =  request.args.get('token')
+    
+    #use the token to retrieve the email (returns None if invalid or expired)
     email = confirmToken(token=token)
 
     if not email:
-        return "Verification link is invalid or expired.", 400
+        #true when the token is invalid or expired
+        #CREATE AN HTML FOR THIS
+        return render_template("verifcation_link_invalid_or_expired.html", email=email), 400
     
+    #connect to our DB
     with SessionLocal() as db:
+        #query the user with the matching email
         user = db.query(Users).filter(Users.email == email).first()
 
         if not user:
+            #if no user exists with this email
             return render_template("verify_error.html", email=email), 200
         
         if user.is_verified:
+            #if the user already verified their account
             return render_template("already_verified.html", email=email), 200
         
+        #we can continue to verify this new user 
         user.is_verified = True
-        db.commit()
+        db.commit() #save changes to the DB
         print(f"the user: {user.username} has been added and rendering the template of verify_success.html")
+        #show the user their verification was a success
         return render_template("verify_sucess.html", email=email), 200
         
 
+@app.route('/UserLogin', methods=['POST'])
+def HandleUserLogin():
+    #get the data sent by the client side
+    data = request.get_json()
+    # verify the data is not malformed than how we expect
+    if not data or 'UserData' not in data:
+        return jsonify({"error": "User's data not in request"})
+    #access data to get our user's data
+    user_data = data.get('UserData')
+    print("user data in login: ", user_data)
+
+    #CONTINUE HERE WHEN I COMEBACK
+    with SessionLocal() as db:
+        pass
+
+    return jsonify({"end": "end of code"})
+    
 
 def readUserTable():
     with SessionLocal() as db:
