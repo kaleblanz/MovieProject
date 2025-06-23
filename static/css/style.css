@@ -58,9 +58,6 @@ header{
 
 
 
-
-
-
 /*title about carouesl of trending movies*/
 #titlePopMovies {
   font-family: 'Segoe UI', sans-serif;
@@ -113,6 +110,10 @@ body{
     letter-spacing: 2px;
     text-transform: uppercase;
 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
     opacity: 0.1;
     /*start the opac at .1 then fade into 1 in 2s*/
     animation: fadeInOpacity 2s ease-in forwards;
@@ -154,17 +155,27 @@ li a {
   padding: 14px 20px; /*padding around each block*/
   text-decoration: none;
   float: left;
+
+
 }
 
 /* Change the link color to #111 (black) on hover */
 li a:hover {
   background-color: rgb(56, 201, 43);
+  border-radius: 50px;
 }
 
 /*sign in button in nav bar*/
 #signIn{
     float: right;
     background-color: #3f2b96;
+}
+
+#items-nav li{
+  border: 1px solid white;
+  border-radius: 50px; /* optional: for rounded corners */
+  
+  display: inline-block; /* keeps the nav items in a row */
 }
 
 
@@ -535,8 +546,8 @@ has predefined class that we use such as .swiper  and .swiper slide*/
 
 /*styling for the login page background*/
 #login-body{
-  margin: 0;
-  padding: 0;
+  /*margin: 0;*/
+  /*padding: 0;*/
   font-family: 'Poppins', sans-serif;
   color: #2e2e6a; /* deep purple-blue */
 

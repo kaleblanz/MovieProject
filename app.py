@@ -1,5 +1,5 @@
 from openai import OpenAI
-from flask import Flask, jsonify, render_template, url_for,redirect, request
+from flask import Flask, jsonify, render_template, url_for,redirect, request, session
 import os
 from dotenv import load_dotenv
 import requests
@@ -16,7 +16,7 @@ import re
 from db import SessionLocal
 from models import Users
 from datetime import datetime, timezone
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from email_validator import validate_email, EmailNotValidError
 
 #limit repeated requests
@@ -36,8 +36,12 @@ from email_verification import confirmToken, generateConfirmationToken
 #app object resprents our web app, instance of flask class
 app = Flask(__name__)
 
-
 load_dotenv()
+
+app.secret_key = os.getenv('SECRET_KEY')
+#security for sessions
+
+
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com' #the SMTP server
 app.config['MAIL_PORT'] = 587 #port for TLS encryption
@@ -106,9 +110,14 @@ def homePage():
 
     returns: the home page
     """
-    return render_template("index.html")
-    #datas = currentPopularMovies()['results']
-    #return render_template("index.html",datas=datas)
+    #from the session to see if they're logged in
+    user_id = session.get('user_id')
+    user_email = session.get('user_email')
+    user_username = session.get('user_username')
+    return render_template("index.html", logged_in=bool(user_id), 
+                           user_email=user_email,
+                           user_username=user_username)
+    
 
 
 @app.route('/login')
@@ -854,7 +863,7 @@ def search_movie(movie):
 db = SessionLocal()
 
 @app.route('/UserRegistration', methods=['POST'])
-@limiter.limit("5 per minute")
+@limiter.limit("6 per minute")
 def handleUserRegistration():
     """
     this route handles user registration from a POST request
@@ -1028,6 +1037,7 @@ def verifyEmail():
         
 
 @app.route('/UserLogin', methods=['POST'])
+@limiter.limit("6 per minute")
 def HandleUserLogin():
     #get the data sent by the client side
     data = request.get_json()
@@ -1038,12 +1048,44 @@ def HandleUserLogin():
     user_data = data.get('UserData')
     print("user data in login: ", user_data)
 
-    #CONTINUE HERE WHEN I COMEBACK
-    with SessionLocal() as db:
-        pass
+    email = user_data['email']
+    password = user_data['password']
+    print("email: ", email)
+    print("passsweord: ", password)
 
-    return jsonify({"end": "end of code"})
-    
+   
+    with SessionLocal() as db:
+        user = db.query(Users).filter(Users.email == email).first()
+
+        if not user:
+            #true when theres no user that matches with this email
+            return jsonify({"error": "This Email Is Not Registered"})
+        
+        #if password is wrong
+        if not check_password_hash(user.password_hashed, password):
+            #true when the email is the same but the passwords are different
+            return jsonify({"error": "The Password Entered Is Incorrect"})
+
+        #if account isn't verified
+        if user.is_verified == False:
+            #true when user never verified their account via sent email
+            return jsonify({"error": "Your Account Was Never Verified, Check Your Email"})
+        
+        #stores user's ID in the session cookie
+        #every time a user sends a request, FLASK recovers their session using that cookie
+        #this allows the user to stay logged in without entering their info every page 
+        session['user_id'] = user.id
+        session['user_email'] = user.email
+        session['user_username'] = user.username
+
+    return jsonify({"success": "email and password matches"})
+
+@app.route('/logout')
+def HandleLogOut():
+    #removes every thing stored in the session
+    session.clear()
+    return render_template('index.html')
+
 
 def readUserTable():
     with SessionLocal() as db:

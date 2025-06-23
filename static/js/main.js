@@ -481,10 +481,19 @@ async function UserLoginHandler() {
       const response = await fetch('/UserLogin', {
         method: 'POST',
         headers : {"Content-Type" : "application/json"},
-        body: JSON.stringify(UserData)
+        body: JSON.stringify(UserData),
+        credentials: "include"  // tells browser to send cookies
       });
 
       console.log(response.status);
+
+      const result = await response.json();
+
+      if (result.success){
+        window.location.href = '/home';
+      }else{
+        alert(result.error);
+      }
 
 
 

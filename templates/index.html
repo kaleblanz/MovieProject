@@ -29,14 +29,35 @@
         <h1 class="title"><b><i>Welcome to CinemaPrompt</i></b></h1>
     </header>
 
-    <nav class="navbar">
-        <ul>
+    {% if logged_in %}
+        <nav class="navbar">
+            <ul id="items-nav">
+                <li><a href="/home">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/logout">Log Out</a></li>
+                <li id="signIn"><a href="">{{user_username}}</a></li>
+                <li>
+                    <form id="nav-search" action="/searchForAMovie" method="GET">
+                    <input type="text" name="query" placeholder="Search movies..." required>
+                    <button type="submit">🔍</button>
+                    </form>
+                </li>
+            </ul>
+            
+        </nav>
+
+        <h1 class="title"><b>Welcome Back, {{user_username}} !</b></h1>
+    {% else %}
+        <nav class="navbar">
+        <ul id="items-nav">
             <li><a href="">Home</a></li>
             <li><a href="">Contact</a></li>
             <li><a href="">About Me</a></li>
             <li id="signIn"><a href="/login">Sign In</a></li>
         </ul>
     </nav>
+    {% endif %}
+
 
     <main>
         <h1 id="titlePopMovies"><b><i>Current Trending Films:</i></b></h1>
