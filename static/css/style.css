@@ -180,6 +180,54 @@ li a:hover {
 
 
 
+/*style the container of the seach bar*/
+#movie-search{
+  margin-left: auto; /*pushes seach to right in flex container*/
+  display: flex; /*enables horiz layout for input and button*/
+  align-items: center; /*centers the input and button veritcally*/
+  gap: 5px; /*gap between search bar and search button*/
+
+  /*placement of where bar is located in nav*/
+  margin-left: 1300px;
+  margin-top: -42px;
+  
+  
+}
+
+
+/*style the search bar input*/
+#movie-search input[type="text"] {
+  padding: 5px; /*adds space inside the search bar*/
+  border-radius: 5px; /*rounds the corners of the search bar*/
+  border: 1px solid white; /*white border around search bar*/
+  background-color: #1a1919; /*black background in search bar*/
+  color: white; /*white text for input */
+  width: 300px; /*width of bar*/
+}
+
+#movie-search input:hover{
+  border: 1px solid rgb(144, 30, 197); /*adds purple border when hover*/
+}
+
+/*styles the search button*/
+#movie-search button {
+  padding: 5px 10px; /*adds padding around search icon*/
+  background-color: white; /*white background*/
+  border-radius: 10px; /*round the white borders corners*/
+  cursor: pointer; /*changes curser to pointer when on image*/
+}
+
+/*hovering over search button*/
+#movie-search button:hover {
+  background-color: #b3b2b2; /*background color change when hover*/
+  border: 2px solid rgb(144, 30, 197); /*adds purple border when hover*/
+}
+
+
+
+
+
+
 /*this link in html: <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 has predefined class that we use such as .swiper  and .swiper slide*/
 

@@ -36,12 +36,11 @@
                 <li><a href="/dashboard">Dashboard</a></li>
                 <li><a href="/logout">Log Out</a></li>
                 <li id="signIn"><a href="">{{user_username}}</a></li>
-                <li>
-                    <form id="nav-search" action="/searchForAMovie" method="GET">
-                    <input type="text" name="query" placeholder="Search movies..." required>
+                <!-- search bar in the nav bar-->
+                <form id="movie-search" action="/searchForAMovie" method="GET">
+                    <input type="text" name="searchbar-movie" placeholder="Search movies..." required>
                     <button type="submit">🔍</button>
-                    </form>
-                </li>
+                </form> 
             </ul>
             
         </nav>
@@ -54,6 +53,11 @@
             <li><a href="">Contact</a></li>
             <li><a href="">About Me</a></li>
             <li id="signIn"><a href="/login">Sign In</a></li>
+            <!-- search bar in the nav bar-->
+            <form id="movie-search" action="/searchForAMovie" method="GET">
+                <input type="text" name="searchbar-movie" placeholder="Search movies..." required>
+                <button type="submit">🔍</button>
+            </form>       
         </ul>
     </nav>
     {% endif %}

@@ -65,7 +65,7 @@ mail = Mail(app)
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["200 per day", "50 per hour"] #global limits
+    default_limits=["500 per day", "200 per hour"] #global limits
 )
 
 GENRES_ALIASES = {
