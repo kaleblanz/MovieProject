@@ -144,7 +144,10 @@ ul {
   padding: 0;
   overflow: hidden;
   background-color: #333333;
+ 
 }
+
+
 
 
 /*list elem in nav bar*/
@@ -155,14 +158,14 @@ li a {
   padding: 14px 20px; /*padding around each block*/
   text-decoration: none;
   float: left;
-
-
+  
 }
 
-/* Change the link color to #111 (black) on hover */
+
 li a:hover {
-  background-color: rgb(56, 201, 43);
-  border-radius: 50px;
+  background-color: rgb(17, 212, 17); /*subtle green hover*/
+  border-radius: 6px;
+  
 }
 
 /*sign in button in nav bar*/
@@ -172,56 +175,109 @@ li a:hover {
 }
 
 #items-nav li{
-  border: 1px solid white;
-  border-radius: 50px; /* optional: for rounded corners */
-  
-  display: inline-block; /* keeps the nav items in a row */
-}
-
-
-
-/*style the container of the seach bar*/
-#movie-search{
-  margin-left: auto; /*pushes seach to right in flex container*/
-  display: flex; /*enables horiz layout for input and button*/
-  align-items: center; /*centers the input and button veritcally*/
-  gap: 5px; /*gap between search bar and search button*/
-
-  /*placement of where bar is located in nav*/
-  margin-left: 1300px;
-  margin-top: -42px;
+  border: 1px solid rgba(255, 255, 255, 0.877); /*border*/
+  border-radius: 6px; /*rounding*/
+  padding: 6px 12px; /*some inner spacing*/
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+  display: inline-block; /*keeps the nav items in a row*/
   
   
 }
 
 
-/*style the search bar input*/
+
+
+
+.navbar {
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  
+}
+
+/*nav items */
+#items-nav {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333333;
+  display: flex; /*keep nav items in a row*/
+  height: 50px; /*navbar height*/
+  align-items: center; /*vertically center the items*/
+  gap: 40px;
+
+  padding-left: 40px;
+}
+
+.search-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  /*for the seachbar*/
+}
+
+
+/*seach bar style*/
+#movie-search {
+  display: flex;
+  align-items: center;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: #2c2c2c;
+  overflow: hidden;
+  padding: 4px 8px;
+  margin: 0 30px; /* space between nav and sign in */
+  
+  position: relative;
+  left: 400px;
+
+
+}
+
+#movie-search:hover {
+  border: 1px solid rgb(137, 16, 194);
+  box-shadow: 0 0 8px rgb(137, 16, 194);
+  transition: box-shadow 0.3s ease;
+}
+
+/*border around search bar*/
+#movie-search:focus-within {
+  border: 1px solid rgb(202, 103, 248);
+  box-shadow: 0 0 8px rgb(202, 103, 248);
+  transition: box-shadow 0.3s ease;
+ 
+}
+
+
 #movie-search input[type="text"] {
-  padding: 5px; /*adds space inside the search bar*/
-  border-radius: 5px; /*rounds the corners of the search bar*/
-  border: 1px solid white; /*white border around search bar*/
-  background-color: #1a1919; /*black background in search bar*/
-  color: white; /*white text for input */
-  width: 300px; /*width of bar*/
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  width: 220px;
+  font-size: 14px;
 }
 
-#movie-search input:hover{
-  border: 1px solid rgb(144, 30, 197); /*adds purple border when hover*/
+#movie-search input:focus {
+  outline: none;
 }
 
-/*styles the search button*/
 #movie-search button {
-  padding: 5px 10px; /*adds padding around search icon*/
-  background-color: white; /*white background*/
-  border-radius: 10px; /*round the white borders corners*/
-  cursor: pointer; /*changes curser to pointer when on image*/
+  background-color: rgb(144, 30, 197);
+  border: none;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-/*hovering over search button*/
 #movie-search button:hover {
-  background-color: #b3b2b2; /*background color change when hover*/
-  border: 2px solid rgb(144, 30, 197); /*adds purple border when hover*/
+  background-color: rgb(180, 60, 230);
 }
+
 
 
 

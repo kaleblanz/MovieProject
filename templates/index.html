@@ -37,10 +37,12 @@
                 <li><a href="/logout">Log Out</a></li>
                 <li id="signIn"><a href="">{{user_username}}</a></li>
                 <!-- search bar in the nav bar-->
+                <div class="search-wrapper">
                 <form id="movie-search" action="/searchForAMovie" method="GET">
                     <input type="text" name="searchbar-movie" placeholder="Search movies..." required>
                     <button type="submit">🔍</button>
                 </form> 
+                </div>
             </ul>
             
         </nav>
@@ -54,12 +56,16 @@
             <li><a href="">About Me</a></li>
             <li id="signIn"><a href="/login">Sign In</a></li>
             <!-- search bar in the nav bar-->
+            <div class="search-wrapper">
             <form id="movie-search" action="/searchForAMovie" method="GET">
                 <input type="text" name="searchbar-movie" placeholder="Search movies..." required>
                 <button type="submit">🔍</button>
-            </form>       
+            </form>
+            </div>
+      
         </ul>
     </nav>
+
     {% endif %}
 
 

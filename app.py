@@ -1059,17 +1059,17 @@ def HandleUserLogin():
 
         if not user:
             #true when theres no user that matches with this email
-            return jsonify({"error": "This Email Is Not Registered"})
+            return jsonify({"error": "This Email Is Not Registered"}), 400
         
         #if password is wrong
         if not check_password_hash(user.password_hashed, password):
             #true when the email is the same but the passwords are different
-            return jsonify({"error": "The Password Entered Is Incorrect"})
+            return jsonify({"error": "The Password Entered Is Incorrect"}), 400
 
         #if account isn't verified
         if user.is_verified == False:
             #true when user never verified their account via sent email
-            return jsonify({"error": "Your Account Was Never Verified, Check Your Email"})
+            return jsonify({"error": "Your Account Was Never Verified, Check Your Email"}), 400
         
         #stores user's ID in the session cookie
         #every time a user sends a request, FLASK recovers their session using that cookie
@@ -1078,7 +1078,7 @@ def HandleUserLogin():
         session['user_email'] = user.email
         session['user_username'] = user.username
 
-    return jsonify({"success": "email and password matches"})
+    return jsonify({"success": "email and password matches"}), 200
 
 @app.route('/logout')
 def HandleLogOut():

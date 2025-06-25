@@ -458,6 +458,13 @@ document.addEventListener("DOMContentLoaded", setUpRegisterFormHandler);
 
 
 
+/**
+ * event handling the User Login
+ * - confirms the password and confirm password arte a match before sending to server
+ * - if passwords match, use data is sent to server by POST request
+ * - if response is succesful, replaces the page with a response HTML that tells user an email has been sent
+ * - if error occurs, it displays the the correct error message
+ */
 async function UserLoginHandler() {
   //make sure its the login page
   const verify_its_login_page = document.getElementById('LOGIN-PAGE');
@@ -471,18 +478,21 @@ async function UserLoginHandler() {
       event.preventDefault(); //prevent from page to reload
 
       //retrive the email
-      const email = document.getElementById('email-login').value;
+      const email = document.getElementById('email-login');
       //retrieve the password
-      const password = document.getElementById('password-login').value;
+      const password = document.getElementById('password-login');
 
-      const UserData = {"UserData" : {"email": email, "password" : password}};
+      //retrive error display
+      const error_display = document.getElementById('password-error')
+
+      const UserData = {"UserData" : {"email": email.value, "password" : password.value}};
       
       //sent the userData via a POST request to backend server
       const response = await fetch('/UserLogin', {
         method: 'POST',
         headers : {"Content-Type" : "application/json"},
         body: JSON.stringify(UserData),
-        credentials: "include"  // tells browser to send cookies
+        credentials: "include"  // tells browser to send cookies for sessions
       });
 
       console.log(response.status);
@@ -492,7 +502,23 @@ async function UserLoginHandler() {
       if (result.success){
         window.location.href = '/home';
       }else{
-        alert(result.error);
+        const error_text = result.error
+        if(error_text.includes('This Email Is Not Registered')){
+          email.classList.add('error')
+          error_display.style.display = 'block'
+          error_display.textContent = error_text
+        }
+        if(error_text.includes('The Password Entered Is Incorrect')){
+          password.classList.add('error')
+          error_display.style.display = 'block'
+          error_display.textContent = error_text
+        }
+        if(error_text.includes('Your Account Was Never Verified, Check Your Email')){
+          password.classList.add('error')
+          error_display.style.display = 'block'
+          error_display.textContent = error_text
+        }
+        //alert(result.error);
       }
 
 
