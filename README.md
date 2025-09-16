@@ -6,7 +6,7 @@ A full-stack web app I built that uses a large language model to give movie reco
 
 ### **Tech Stack**
 
-* **Backend**: Python, Flask, SQLAlchemy, PostgreSQL, ItsDangerous, Limiter, Werkzeug Security
+* **Backend**: Python, Flask, SQLAlchemy, ItsDangerous, Limiter, Werkzeug Security
 * **Frontend**: HTML5, CSS3, JavaScript, Jinja, Swiper.js
 * **APIs**: I integrated with both the OpenAI and TMDB APIs to handle the recommendation engine and movie data.
 
