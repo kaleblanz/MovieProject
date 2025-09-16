@@ -8,7 +8,7 @@ A full-stack web app I built that uses a large language model to give movie reco
 
 * **Backend**: Python, Flask, SQLAlchemy, PostgreSQL, ItsDangerous, Limiter, Werkzeug Security
 * **Frontend**: HTML5, CSS3, JavaScript, Jinja, Swiper.js
-* **APIs**: I integrated with both the OPENAI and TMDB APIs to handle the recommendation engine and movie data.
+* **APIs**: I integrated with both the OpenAI and TMDB APIs to handle the recommendation engine and movie data.
 
 ---
 
@@ -16,7 +16,7 @@ A full-stack web app I built that uses a large language model to give movie reco
 
 * **User Management**: I designed and implemented a complete and secure user authentication system. This included handling account creation, hashing passwords for security, and setting up an email verification process to confirm user identities.
 
-* **Building the Recommendation Engine**: The core of the app is its ability to understand what a user wants. I built the logic to take a natural language prompt, send it to the OPENAI, and use the response to find and display relevant movies from the TMDB database to fit the user's prompt.
+* **Building the Recommendation Engine**: The core of the app is its ability to understand what a user wants. I built the logic to take a natural language prompt, send it to the OpenAI, and use the response to find and display relevant movies from the TMDB database to fit the user's prompt.
 
 * **Database Design**: I set up and managed a SQL database using SQLAlchemy. I created the schema and handled all the data operations for user accounts, ensuring everything was stored and retrieved efficiently.
 
